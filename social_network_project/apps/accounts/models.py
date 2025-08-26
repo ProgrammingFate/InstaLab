@@ -18,6 +18,7 @@ class CustomUser(AbstractUser):
     company_name = models.CharField(max_length=100, blank=True, null=True)
     company_description = models.TextField(blank=True, null=True)
     company_website = models.URLField(blank=True, null=True)
+    company_instagram = models.CharField(max_length=100, blank=True, null=True, help_text="Ex: @empresajr")
     
     # Campos específicos para estudantes
     course = models.CharField(max_length=100, blank=True, null=True)

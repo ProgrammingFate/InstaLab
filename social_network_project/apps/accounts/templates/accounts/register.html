@@ -57,32 +57,128 @@
 
         <!-- Tipo de Usuário -->
         <div class="form-section">
-            <h3>Tipo de Conta</h3>
+            <h3>✨ Escolha seu Perfil</h3>
+            <p style="color: var(--text-secondary); margin-bottom: 30px; font-size: 1rem; text-align: center;">
+                Selecione o tipo de conta que melhor representa você no InstaLab
+            </p>
             
-            <div class="form-group">
-                {{ form.user_type.label_tag }}
-                {{ form.user_type }}
-                {% if form.user_type.errors %}
-                    <div class="error-message">{{ form.user_type.errors }}</div>
-                {% endif %}
+            <div class="profile-selection">
+                <div class="profile-card" data-type="student">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="icon-graduation"></i>
+                        </div>
+                        <h4>Estudante</h4>
+                        <div class="card-badge">Popular</div>
+                    </div>
+                    <p>Para universitários em busca de oportunidades incríveis</p>
+                    <div class="card-benefits">
+                        <div class="benefit">
+                            <span class="benefit-icon">🎯</span>
+                            <span>Buscar vagas exclusivas</span>
+                        </div>
+                        <div class="benefit">
+                            <span class="benefit-icon">🤝</span>
+                            <span>Networking com EJs</span>
+                        </div>
+                        <div class="benefit">
+                            <span class="benefit-icon">🚀</span>
+                            <span>Participar de projetos</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="profile-card" data-type="company">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="icon-company"></i>
+                        </div>
+                        <h4>Empresa Júnior</h4>
+                        <div class="card-badge professional">Pro</div>
+                    </div>
+                    <p>Para empresas juniores e organizações estudantis</p>
+                    <div class="card-benefits">
+                        <div class="benefit">
+                            <span class="benefit-icon">📢</span>
+                            <span>Publicar vagas</span>
+                        </div>
+                        <div class="benefit">
+                            <span class="benefit-icon">📊</span>
+                            <span>Divulgar projetos</span>
+                        </div>
+                        <div class="benefit">
+                            <span class="benefit-icon">📱</span>
+                            <span>Criar stories</span>
+                        </div>
+                    </div>
+                </div>
             </div>
+            
+            <!-- Campo oculto para o formulário -->
+            <input type="hidden" name="user_type" id="id_user_type" value="">
+            {% if form.user_type.errors %}
+                <div class="error-message">{{ form.user_type.errors }}</div>
+            {% endif %}
         </div>
 
         <!-- Campos para Empresa (ocultos inicialmente) -->
-        <div class="form-section" id="companyFields" style="display: none;">
-            <h3>Informações da Empresa/Organização</h3>
-            
-            <div class="form-group">
-                {{ form.company_name.label_tag }}
-                {{ form.company_name }}
-                {% if form.company_name.errors %}
-                    <div class="error-message">{{ form.company_name.errors }}</div>
-                {% endif %}
+        <div class="form-section company-section" id="companyFields" style="display: none;">
+            <div class="section-header">
+                <div class="section-icon">🏢</div>
+                <div>
+                    <h3>Informações da Empresa</h3>
+                    <p class="section-subtitle">Conte-nos sobre sua empresa júnior</p>
+                </div>
             </div>
             
-            <div class="form-group">
-                {{ form.company_description.label_tag }}
-                {{ form.company_description }}
+            <div class="modern-form-grid">
+                <div class="form-group modern-input">
+                    <label for="id_company_name" class="modern-label">
+                        <span class="label-text">{{ form.company_name.label }}</span>
+                        <span class="label-required">*</span>
+                    </label>
+                    <div class="input-wrapper">
+                        {{ form.company_name }}
+                        <div class="input-border"></div>
+                    </div>
+                    {% if form.company_name.errors %}
+                        <div class="error-message">{{ form.company_name.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group modern-input">
+                    <label for="id_company_instagram" class="modern-label">
+                        <span class="label-text">{{ form.company_instagram.label }}</span>
+                        <span class="label-optional">opcional</span>
+                    </label>
+                    <div class="input-wrapper">
+                        {{ form.company_instagram }}
+                        <div class="input-border"></div>
+                        <div class="input-icon">📱</div>
+                    </div>
+                    {% if form.company_instagram.errors %}
+                        <div class="error-message">{{ form.company_instagram.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="form-group modern-textarea">
+                <label for="id_company_description" class="modern-label">
+                    <span class="label-text">{{ form.company_description.label }}</span>
+                    <span class="label-required">*</span>
+                </label>
+                <div class="textarea-wrapper">
+                    {{ form.company_description }}
+                    <div class="textarea-border"></div>
+                    <div class="textarea-helper">
+                        <div class="helper-tips">
+                            <span class="tip">💡 Dicas:</span>
+                            <span>• Missão e visão</span>
+                            <span>• Áreas de atuação</span>
+                            <span>• Projetos realizados</span>
+                        </div>
+                    </div>
+                </div>
                 {% if form.company_description.errors %}
                     <div class="error-message">{{ form.company_description.errors }}</div>
                 {% endif %}
@@ -90,32 +186,190 @@
         </div>
 
         <!-- Campos para Estudante (ocultos inicialmente) -->
-        <div class="form-section" id="studentFields" style="display: none;">
-            <h3>Informações Acadêmicas</h3>
-            
-            <div class="form-group">
-                {{ form.course.label_tag }}
-                {{ form.course }}
-                {% if form.course.errors %}
-                    <div class="error-message">{{ form.course.errors }}</div>
-                {% endif %}
+        <div class="form-section student-section" id="studentFields" style="display: none;">
+            <div class="section-header">
+                <div class="section-icon">🎓</div>
+                <div>
+                    <h3>Informações Acadêmicas</h3>
+                    <p class="section-subtitle">Conte-nos sobre seus estudos</p>
+                </div>
             </div>
             
-            <div class="form-group">
-                {{ form.university.label_tag }}
-                {{ form.university }}
+            <div class="modern-form-grid">
+                <div class="form-group modern-input">
+                    <label for="id_course" class="modern-label">
+                        <span class="label-text">{{ form.course.label }}</span>
+                        <span class="label-required">*</span>
+                    </label>
+                    <div class="input-wrapper">
+                        {{ form.course }}
+                        <div class="input-border"></div>
+                    </div>
+                    {% if form.course.errors %}
+                        <div class="error-message">{{ form.course.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group modern-input">
+                    <label for="id_semester" class="modern-label">
+                        <span class="label-text">{{ form.semester.label }}</span>
+                        <span class="label-required">*</span>
+                    </label>
+                    <div class="input-wrapper">
+                        {{ form.semester }}
+                        <div class="input-border"></div>
+                    </div>
+                    {% if form.semester.errors %}
+                        <div class="error-message">{{ form.semester.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="form-group modern-input university-input">
+                <label for="id_university" class="modern-label">
+                    <span class="label-text">{{ form.university.label }}</span>
+                    <span class="label-required">*</span>
+                </label>
+                <div class="input-wrapper">
+                    {{ form.university }}
+                    <div class="input-border"></div>
+                    <div class="input-icon">🏫</div>
+                </div>
                 {% if form.university.errors %}
                     <div class="error-message">{{ form.university.errors }}</div>
                 {% endif %}
+                <div class="university-helper">
+                    <span class="helper-text">💡 Digite para buscar entre 100+ universidades brasileiras</span>
+                </div>
             </div>
             
-            <div class="form-group">
-                {{ form.semester.label_tag }}
-                {{ form.semester }}
-                {% if form.semester.errors %}
-                    <div class="error-message">{{ form.semester.errors }}</div>
-                {% endif %}
-            </div>
+            <!-- Datalist com universidades brasileiras -->
+            <datalist id="universities-list">
+                <!-- Universidades Federais -->
+                <option value="Universidade de São Paulo (USP)">
+                <option value="Universidade Federal do Rio de Janeiro (UFRJ)">
+                <option value="Universidade Federal de Minas Gerais (UFMG)">
+                <option value="Universidade Federal do Rio Grande do Sul (UFRGS)">
+                <option value="Universidade Estadual de Campinas (UNICAMP)">
+                <option value="Universidade Federal de Santa Catarina (UFSC)">
+                <option value="Universidade Federal do Paraná (UFPR)">
+                <option value="Universidade Federal de Pernambuco (UFPE)">
+                <option value="Universidade Federal da Bahia (UFBA)">
+                <option value="Universidade Federal do Ceará (UFC)">
+                <option value="Universidade Federal de Goiás (UFG)">
+                <option value="Universidade de Brasília (UnB)">
+                <option value="Universidade Federal Fluminense (UFF)">
+                <option value="Universidade Federal de Viçosa (UFV)">
+                <option value="Universidade Federal de São Carlos (UFSCar)">
+                <option value="Universidade Federal do Espírito Santo (UFES)">
+                <option value="Universidade Federal de São Paulo (UNIFESP)">
+                <option value="Universidade Federal do ABC (UFABC)">
+                
+                <!-- Pontifícias Universidades Católicas -->
+                <option value="Pontifícia Universidade Católica do Rio de Janeiro (PUC-Rio)">
+                <option value="Pontifícia Universidade Católica de São Paulo (PUC-SP)">
+                <option value="Pontifícia Universidade Católica do Rio Grande do Sul (PUCRS)">
+                <option value="Pontifícia Universidade Católica de Minas Gerais (PUC Minas)">
+                <option value="Pontifícia Universidade Católica do Paraná (PUCPR)">
+                <option value="Pontifícia Universidade Católica de Campinas (PUC-Campinas)">
+                <option value="Pontifícia Universidade Católica de Goiás (PUC Goiás)">
+                
+                <!-- Universidades Privadas - São Paulo -->
+                <option value="Fundação Getulio Vargas (FGV)">
+                <option value="Universidade Presbiteriana Mackenzie">
+                <option value="Universidade Anhembi Morumbi">
+                <option value="Centro Universitário FEI">
+                <option value="Universidade Paulista (UNIP)">
+                <option value="Universidade Nove de Julho (UNINOVE)">
+                <option value="Universidade Cruzeiro do Sul (UNICSUL)">
+                <option value="Universidade São Judas Tadeu">
+                <option value="Universidade Metodista de São Paulo">
+                <option value="Universidade de Mogi das Cruzes (UMC)">
+                <option value="Centro Universitário das Faculdades Metropolitanas Unidas (FMU)">
+                <option value="Universidade Anhanguera (UNIDERP)">
+                <option value="Faculdade de Tecnologia de São Paulo (FATEC)">
+                <option value="Universidade Braz Cubas">
+                <option value="Universidade de Ribeirão Preto (UNAERP)">
+                <option value="Centro Universitário SENAC">
+                <option value="Faculdades Integradas Rio Branco">
+                <option value="Universidade Ibirapuera (UNIB)">
+                
+                <!-- Universidades Privadas - Rio de Janeiro -->
+                <option value="Universidade Estácio de Sá (UNESA)">
+                <option value="Universidade Veiga de Almeida (UVA)">
+                <option value="Universidade Candido Mendes (UCAM)">
+                <option value="Centro Universitário Carioca (UniCarioca)">
+                <option value="Universidade Gama Filho (UGF)">
+                <option value="Centro Universitário Augusto Motta (UNISUAM)">
+                <option value="Universidade Salgado de Oliveira (UNIVERSO)">
+                <option value="Centro Universitário da Cidade (UniverCidade)">
+                
+                <!-- Universidades Privadas - Minas Gerais -->
+                <option value="Universidade FUMEC">
+                <option value="Centro Universitário de Belo Horizonte (UniBH)">
+                <option value="Centro Universitário Newton Paiva">
+                <option value="Faculdade de Medicina de Barbacena (FAME)">
+                <option value="Universidade José do Rosário Vellano (UNIFENAS)">
+                <option value="Centro Universitário UNA">
+                
+                <!-- Universidades Privadas - Rio Grande do Sul -->
+                <option value="Universidade do Vale do Rio dos Sinos (UNISINOS)">
+                <option value="Universidade de Caxias do Sul (UCS)">
+                <option value="Universidade FEEVALE">
+                <option value="Centro Universitário Ritter dos Reis (UniRitter)">
+                <option value="Universidade La Salle (UNILASALLE)">
+                
+                <!-- Universidades Privadas - Santa Catarina -->
+                <option value="Universidade do Vale do Itajaí (UNIVALI)">
+                <option value="Universidade Regional de Blumenau (FURB)">
+                <option value="Universidade do Sul de Santa Catarina (UNISUL)">
+                <option value="Centro Universitário Católica de Santa Catarina">
+                
+                <!-- Universidades Privadas - Paraná -->
+                <option value="Universidade Positivo (UP)">
+                <option value="Centro Universitário Curitiba (UNICURITIBA)">
+                <option value="Faculdades Integradas do Brasil (UniBrasil)">
+                <option value="Centro Universitário Campos de Andrade (UNIANDRADE)">
+                
+                <!-- Universidades Privadas - Bahia -->
+                <option value="Universidade Salvador (UNIFACS)">
+                <option value="Faculdade Ruy Barbosa (FRB)">
+                <option value="Centro Universitário Jorge Amado (UNIJORGE)">
+                
+                <!-- Universidades Privadas - Pernambuco -->
+                <option value="Universidade Católica de Pernambuco (UNICAP)">
+                <option value="Faculdade Boa Viagem (FBV)">
+                <option value="Centro Universitário Maurício de Nassau (UNINASSAU)">
+                
+                <!-- Universidades Privadas - Ceará -->
+                <option value="Universidade de Fortaleza (UNIFOR)">
+                <option value="Centro Universitário Christus (UNICHRISTUS)">
+                <option value="Faculdade Luciano Feijão (FLF)">
+                
+                <!-- Universidades Privadas - Distrito Federal -->
+                <option value="Centro Universitário de Brasília (UniCEUB)">
+                <option value="Instituto de Educação Superior de Brasília (IESB)">
+                <option value="Universidade Católica de Brasília (UCB)">
+                
+                <!-- Universidades EAD e Grandes Redes -->
+                <option value="Kroton Educacional">
+                <option value="Universidade Norte do Paraná (UNOPAR)">
+                <option value="Anhanguera Educacional">
+                <option value="Centro Universitário Leonardo da Vinci (UNIASSELVI)">
+                <option value="Universidade Pitágoras (UNOPAR)">
+                <option value="Centro Universitário Internacional (UNINTER)">
+                <option value="Universidade Cruzeiro do Sul Virtual">
+                
+                <!-- Institutos Tecnológicos -->
+                <option value="Instituto Tecnológico de Aeronáutica (ITA)">
+                <option value="Instituto Militar de Engenharia (IME)">
+                <option value="Centro Federal de Educação Tecnológica de Minas Gerais (CEFET-MG)">
+                <option value="Centro Federal de Educação Tecnológica Celso Suckow da Fonseca (CEFET/RJ)">
+                <option value="Universidade Tecnológica Federal do Paraná (UTFPR)">
+                
+                <!-- Opção para outras -->
+                <option value="Outras - Especificar nos comentários">
+            </datalist>
         </div>
         
         <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 20px;">
@@ -134,6 +388,7 @@
 </div>
 
 <style>
+/* Form Section Styles */
 .form-section {
     margin-bottom: 30px;
     padding: 25px;
@@ -160,17 +415,357 @@
 .form-section:first-child h3 {
     display: none;
 }
+
+/* Profile Selection Cards - Mais Quadrados */
+.profile-selection {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.profile-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(106, 90, 205, 0.15);
+    border-radius: 6px;
+    padding: 24px 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    text-align: center;
+    min-height: 160px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.profile-card:hover {
+    border-color: rgba(106, 90, 205, 0.4);
+    background: rgba(255, 255, 255, 0.06);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(106, 90, 205, 0.15);
+}
+
+.profile-card.selected {
+    border-color: var(--primary);
+    background: rgba(106, 90, 205, 0.08);
+    box-shadow: 0 4px 20px rgba(106, 90, 205, 0.2);
+}
+
+.card-header {
+    margin-bottom: 16px;
+}
+
+.card-icon {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 12px;
+    background: linear-gradient(135deg, var(--primary), #9A7FDF);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+}
+
+.icon-graduation::before {
+    content: '🎓';
+}
+
+.icon-company::before {
+    content: '🏢';
+}
+
+.card-header h4 {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.card-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 2px 8px;
+    background: var(--primary);
+    color: white;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.card-badge.professional {
+    background: #FFD700;
+    color: #333;
+}
+
+.profile-card p {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    line-height: 1.4;
+    margin: 0 0 16px 0;
+}
+
+.card-benefits {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.benefit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    color: var(--text-primary);
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.benefit-icon {
+    font-size: 0.9rem;
+}
+
+/* Modern Company Section Styles */
+.company-section, .student-section {
+    background: linear-gradient(135deg, rgba(106, 90, 205, 0.05), rgba(147, 112, 219, 0.03));
+    border: 1px solid rgba(106, 90, 205, 0.2);
+}
+
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid rgba(106, 90, 205, 0.1);
+}
+
+.section-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, var(--primary), #9A7FDF);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    box-shadow: 0 4px 16px rgba(106, 90, 205, 0.2);
+}
+
+.section-header h3 {
+    margin: 0 0 4px 0;
+    padding: 0;
+    border: none;
+    color: var(--text-primary);
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.section-subtitle {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.modern-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 24px;
+}
+
+.modern-input, .modern-textarea {
+    position: relative;
+}
+
+.modern-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.label-required {
+    color: #ff6b6b;
+    font-size: 0.8rem;
+}
+
+.label-optional {
+    color: var(--text-secondary);
+    font-size: 0.75rem;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.input-wrapper, .textarea-wrapper {
+    position: relative;
+}
+
+.input-wrapper input, .textarea-wrapper textarea {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+}
+
+.textarea-wrapper textarea {
+    min-height: 120px;
+    resize: vertical;
+    line-height: 1.5;
+    padding-right: 45px;
+}
+
+.input-wrapper input:focus, .textarea-wrapper textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 0 2px rgba(106, 90, 205, 0.2);
+}
+
+.input-border, .textarea-border {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--primary), #9A7FDF);
+    width: 0;
+    transition: width 0.3s ease;
+}
+
+.input-wrapper input:focus ~ .input-border,
+.textarea-wrapper textarea:focus ~ .textarea-border {
+    width: 100%;
+}
+
+.input-icon {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 1.1rem;
+    opacity: 0.6;
+}
+
+.textarea-helper {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+}
+
+.helper-tips {
+    background: rgba(0, 0, 0, 0.8);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 0.75rem;
+    color: white;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    z-index: 10;
+}
+
+.helper-tips::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: -6px;
+    transform: translateY(-50%);
+    border: 6px solid transparent;
+    border-left-color: rgba(0, 0, 0, 0.8);
+}
+
+.textarea-wrapper:hover .helper-tips {
+    opacity: 1;
+    visibility: visible;
+}
+
+.helper-tips .tip {
+    display: block;
+    color: #FFD700;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.helper-tips span:not(.tip) {
+    display: block;
+    margin-bottom: 2px;
+}
+
+.university-helper {
+    margin-top: 8px;
+}
+
+.helper-text {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+.error-message {
+    color: #ff6b6b;
+    font-size: 0.8rem;
+    margin-top: 5px;
+}
+
+@media (max-width: 768px) {
+    .profile-selection {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .profile-card {
+        min-height: 140px;
+        padding: 20px 16px;
+    }
+    
+    .modern-form-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    
+    .section-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 12px;
+    }
+    
+    .helper-tips {
+        position: relative;
+        top: auto;
+        right: auto;
+        margin-top: 8px;
+        opacity: 1;
+        visibility: visible;
+        white-space: normal;
+    }
+    
+    .helper-tips::before {
+        display: none;
+    }
+}
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const userTypeSelect = document.getElementById('id_user_type');
+    const profileCards = document.querySelectorAll('.profile-card');
+    const userTypeInput = document.getElementById('id_user_type');
     const companyFields = document.getElementById('companyFields');
     const studentFields = document.getElementById('studentFields');
+    const universityInput = document.getElementById('id_university');
     
-    function toggleFields() {
-        const userType = userTypeSelect.value;
-        
+    function toggleFields(userType) {
         if (userType === 'company') {
             companyFields.style.display = 'block';
             studentFields.style.display = 'none';
@@ -183,11 +778,91 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Toggle inicial
-    toggleFields();
+    function updateCardSelection(selectedType) {
+        profileCards.forEach(card => {
+            card.classList.remove('selected');
+            if (card.dataset.type === selectedType) {
+                card.classList.add('selected');
+            }
+        });
+    }
     
-    // Toggle quando mudar
-    userTypeSelect.addEventListener('change', toggleFields);
+    // Event listeners para os cards
+    profileCards.forEach(card => {
+        card.addEventListener('click', function() {
+            const userType = this.dataset.type;
+            userTypeInput.value = userType;
+            updateCardSelection(userType);
+            toggleFields(userType);
+            
+            // Adiciona um pequeno feedback visual
+            this.style.transform = 'scale(0.98)';
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 150);
+        });
+    });
+    
+    // Se já houver um valor selecionado, atualizar a interface
+    if (userTypeInput.value) {
+        updateCardSelection(userTypeInput.value);
+        toggleFields(userTypeInput.value);
+    }
+    
+    // Sistema de busca avançada para universidades
+    if (universityInput) {
+        let searchTimeout;
+        
+        universityInput.addEventListener('input', function() {
+            const query = this.value.trim();
+            
+            if (query.length < 2) return;
+            
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                searchUniversities(query);
+            }, 300);
+        });
+        
+        async function searchUniversities(query) {
+            try {
+                // Fallback para busca local - sempre usar local agora devido à instabilidade da API
+                localUniversitySearch(query);
+            } catch (error) {
+                localUniversitySearch(query);
+            }
+        }
+        
+        function localUniversitySearch(query) {
+            const datalist = document.getElementById('universities-list');
+            const options = datalist.querySelectorAll('option');
+            const results = [];
+            
+            options.forEach(option => {
+                if (option.value.toLowerCase().includes(query.toLowerCase())) {
+                    results.push({ name: option.value });
+                }
+            });
+            
+            updateUniversityOptions(results.slice(0, 15));
+        }
+        
+        function updateUniversityOptions(universities) {
+            const datalist = document.getElementById('universities-list');
+            
+            // Limpa opções dinâmicas anteriores
+            const dynamicOptions = datalist.querySelectorAll('.dynamic-option');
+            dynamicOptions.forEach(option => option.remove());
+            
+            // Adiciona novas opções
+            universities.forEach(university => {
+                const option = document.createElement('option');
+                option.value = university.name;
+                option.className = 'dynamic-option';
+                datalist.appendChild(option);
+            });
+        }
+    }
 });
 </script>
 {% endblock %}

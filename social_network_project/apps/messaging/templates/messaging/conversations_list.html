@@ -97,12 +97,9 @@
                 
                 {% if conversations %}
                     {% for conversation in conversations %}
-                        {% with other_user=conversation.participants.all|first %}
-                            {% if other_user.id != user.id %}
-                                {% with other_user=other_user %}
-                            {% else %}
-                                {% with other_user=conversation.participants.all|last %}
-                            {% endif %}
+                        {% for participant in conversation.participants.all %}
+                            {% if participant.id != user.id %}
+                                {% with other_user=participant %}
                             
                             <a href="{% url 'messaging:chat_view' conversation.id %}" class="text-decoration-none">
                                 <div class="conversation-item">
@@ -146,8 +143,9 @@
                                 </div>
                             </a>
                             
-                            {% endwith %}
-                        {% endwith %}
+                                {% endwith %}
+                            {% endif %}
+                        {% endfor %}
                     {% endfor %}
                 {% else %}
                     <div class="text-center py-5">

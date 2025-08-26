@@ -17,7 +17,7 @@ class UserRegistrationForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['username', 'email', 'user_type', 'company_name', 'company_description', 
-                 'course', 'university', 'semester']
+                 'company_instagram', 'course', 'university', 'semester']
         widgets = {
             'username': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -36,8 +36,12 @@ class UserRegistrationForm(forms.ModelForm):
             }),
             'company_description': forms.Textarea(attrs={
                 'class': 'form-control',
-                'rows': 3,
-                'placeholder': 'Descreva sua empresa/organização...'
+                'rows': 5,
+                'placeholder': 'Descreva sua empresa júnior:\n\n• Qual é a missão e visão da empresa?\n• Em quais áreas vocês atuam? (marketing, desenvolvimento, consultoria, etc.)\n• Quantos membros tem a equipe?\n• Alguns projetos ou clientes importantes\n• Valores e cultura da empresa\n\nExemplo: "Somos uma empresa júnior de engenharia com foco em soluções tecnológicas. Atuamos há 5 anos no mercado, desenvolvendo projetos de automação e consultoria para pequenas e médias empresas..."'
+            }),
+            'company_instagram': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': '@suaempresajr (opcional)'
             }),
             'course': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -45,7 +49,9 @@ class UserRegistrationForm(forms.ModelForm):
             }),
             'university': forms.TextInput(attrs={
                 'class': 'form-control',
-                'placeholder': 'Ex: USP, UFMG, PUC...'
+                'placeholder': 'Ex: USP, UFMG, PUC...',
+                'list': 'universities-list',
+                'autocomplete': 'off'
             }),
             'semester': forms.TextInput(attrs={
                 'class': 'form-control',
@@ -55,9 +61,18 @@ class UserRegistrationForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # Labels customizados
+        self.fields['company_name'].label = 'Nome da Empresa Júnior'
+        self.fields['company_description'].label = 'Sobre a Empresa Júnior'
+        self.fields['company_instagram'].label = 'Instagram da Empresa (opcional)'
+        self.fields['course'].label = 'Curso'
+        self.fields['university'].label = 'Universidade/Faculdade'
+        self.fields['semester'].label = 'Período/Semestre'
+        
         # Campos condicionais baseados no tipo de usuário
         self.fields['company_name'].required = False
         self.fields['company_description'].required = False
+        self.fields['company_instagram'].required = False
         self.fields['course'].required = False
         self.fields['university'].required = False
         self.fields['semester'].required = False
