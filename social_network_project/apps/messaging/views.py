@@ -50,7 +50,7 @@ def chat_view(request, conversation_id=None):
                 conversation = Conversation.objects.create()
                 conversation.participants.add(request.user, other_user)
         else:
-            return redirect('conversations_list')
+            return redirect('messaging:conversations_list')
     
     # Marcar mensagens como lidas
     ChatMessage.objects.filter(
@@ -81,7 +81,7 @@ def chat_view(request, conversation_id=None):
                         'timestamp': message.timestamp.strftime('%H:%M')
                     }
                 })
-            return redirect('chat_view', conversation_id=conversation.id)
+            return redirect('messaging:chat_view', conversation_id=conversation.id)
     else:
         form = ChatMessageForm()
     
@@ -154,7 +154,7 @@ class CreateStoryView(CreateView):
         # Apenas empresas podem criar stories
         if self.request.user.user_type != 'company':
             messages.error(self.request, 'Apenas empresas podem criar stories.')
-            return redirect('stories_feed')
+            return redirect('messaging:stories_feed')
         return super().form_valid(form)
     
     def get_success_url(self):
@@ -185,4 +185,4 @@ def delete_story(request, story_id):
     story = get_object_or_404(Story, id=story_id, user=request.user)
     story.delete()
     messages.success(request, 'Story deletado com sucesso!')
-    return redirect('stories_feed')
+    return redirect('messaging:stories_feed')

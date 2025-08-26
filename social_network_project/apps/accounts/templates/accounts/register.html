@@ -69,23 +69,8 @@
                             <i class="icon-graduation"></i>
                         </div>
                         <h4>Estudante</h4>
-                        <div class="card-badge">Popular</div>
                     </div>
-                    <p>Para universitários em busca de oportunidades incríveis</p>
-                    <div class="card-benefits">
-                        <div class="benefit">
-                            <span class="benefit-icon">🎯</span>
-                            <span>Buscar vagas exclusivas</span>
-                        </div>
-                        <div class="benefit">
-                            <span class="benefit-icon">🤝</span>
-                            <span>Networking com EJs</span>
-                        </div>
-                        <div class="benefit">
-                            <span class="benefit-icon">🚀</span>
-                            <span>Participar de projetos</span>
-                        </div>
-                    </div>
+                    <p>Para universitários em busca de oportunidades</p>
                 </div>
                 
                 <div class="profile-card" data-type="company">
@@ -94,23 +79,8 @@
                             <i class="icon-company"></i>
                         </div>
                         <h4>Empresa Júnior</h4>
-                        <div class="card-badge professional">Pro</div>
                     </div>
                     <p>Para empresas juniores e organizações estudantis</p>
-                    <div class="card-benefits">
-                        <div class="benefit">
-                            <span class="benefit-icon">📢</span>
-                            <span>Publicar vagas</span>
-                        </div>
-                        <div class="benefit">
-                            <span class="benefit-icon">📊</span>
-                            <span>Divulgar projetos</span>
-                        </div>
-                        <div class="benefit">
-                            <span class="benefit-icon">📱</span>
-                            <span>Criar stories</span>
-                        </div>
-                    </div>
                 </div>
             </div>
             
@@ -433,10 +403,11 @@
     transition: all 0.3s ease;
     position: relative;
     text-align: center;
-    min-height: 160px;
+    min-height: 120px;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: center;
+    align-items: center;
 }
 
 .profile-card:hover {
@@ -453,19 +424,19 @@
 }
 
 .card-header {
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 }
 
 .card-icon {
-    width: 48px;
-    height: 48px;
-    margin: 0 auto 12px;
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 8px;
     background: linear-gradient(135deg, var(--primary), #9A7FDF);
     border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
+    font-size: 1.2rem;
 }
 
 .icon-graduation::before {
@@ -478,55 +449,16 @@
 
 .card-header h4 {
     color: var(--text-primary);
-    font-size: 1.1rem;
+    font-size: 1rem;
     font-weight: 600;
     margin: 0;
 }
 
-.card-badge {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    padding: 2px 8px;
-    background: var(--primary);
-    color: white;
-    border-radius: 3px;
-    font-size: 0.7rem;
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.card-badge.professional {
-    background: #FFD700;
-    color: #333;
-}
-
 .profile-card p {
     color: var(--text-secondary);
-    font-size: 0.85rem;
-    line-height: 1.4;
-    margin: 0 0 16px 0;
-}
-
-.card-benefits {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.benefit {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    color: var(--text-primary);
     font-size: 0.8rem;
-    font-weight: 500;
-}
-
-.benefit-icon {
-    font-size: 0.9rem;
+    line-height: 1.3;
+    margin: 8px 0 0 0;
 }
 
 /* Modern Company Section Styles */
@@ -726,8 +658,8 @@
     }
     
     .profile-card {
-        min-height: 140px;
-        padding: 20px 16px;
+        min-height: 100px;
+        padding: 16px 12px;
     }
     
     .modern-form-grid {

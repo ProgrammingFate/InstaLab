@@ -3,50 +3,385 @@
 
 {% block title %}Perfil - {{ user.nickname }}{% endblock %}
 
+{% block extra_css %}
+<style>
+    body {
+        background: #f8fafc;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    
+    .profile-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+    
+    .profile-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+    }
+    
+    .profile-header {
+        padding: 2rem;
+        text-align: center;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        margin-bottom: 1rem;
+        border: 3px solid #667eea;
+    }
+    
+    .avatar.placeholder {
+        background: #667eea;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: bold;
+        color: white;
+    }
+    
+    .profile-name {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #1a202c;
+        margin-bottom: 0.5rem;
+    }
+    
+    .profile-subtitle {
+        font-size: 1rem;
+        color: #718096;
+        margin-bottom: 1rem;
+    }
+    
+    .user-badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+    
+    .badge-student {
+        background: #e6fffa;
+        color: #047857;
+    }
+    
+    .badge-company {
+        background: #fef7e6;
+        color: #b45309;
+    }
+    
+    .info-section {
+        padding: 1.5rem 2rem;
+    }
+    
+    .section-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .info-grid {
+        display: grid;
+        gap: 1rem;
+    }
+    
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+    
+    .info-item:last-child {
+        border-bottom: none;
+    }
+    
+    .info-label {
+        font-weight: 500;
+        color: #6b7280;
+    }
+    
+    .info-value {
+        font-weight: 500;
+        color: #374151;
+    }
+    
+    .instagram-link {
+        color: #e1306c;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    
+    .instagram-link:hover {
+        color: #c13584;
+    }
+    
+    .tags-section {
+        padding: 1.5rem 2rem;
+        border-top: 1px solid #e2e8f0;
+    }
+    
+    .tags-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .tag {
+        background: #f1f5f9;
+        color: #475569;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    
+    .actions {
+        padding: 1.5rem 2rem;
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+    }
+    
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all 0.2s;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .btn-primary {
+        background: #667eea;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background: #5a67d8;
+        color: white;
+    }
+    
+    .btn-secondary {
+        background: #f8fafc;
+        color: #374151;
+        border: 1px solid #d1d5db;
+    }
+    
+    .btn-secondary:hover {
+        background: #f1f5f9;
+        color: #374151;
+    }
+    
+    .btn-danger {
+        background: #fef2f2;
+        color: #dc2626;
+        border: 1px solid #fecaca;
+    }
+    
+    .btn-danger:hover {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+    
+    .meta-info {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #6b7280;
+        font-size: 0.875rem;
+    }
+    
+    @media (max-width: 768px) {
+        .profile-container {
+            margin: 1rem auto;
+            padding: 0 0.5rem;
+        }
+        
+        .profile-header,
+        .info-section,
+        .tags-section,
+        .actions {
+            padding: 1rem;
+        }
+        
+        .actions {
+            flex-direction: column;
+        }
+        
+        .btn {
+            justify-content: center;
+        }
+        
+        .meta-info {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="profile-container">
-    <div class="profile-header">
-        {% if user.profile_picture %}
-            <img src="{{ user.profile_picture.url }}" alt="Foto de Perfil" class="avatar">
-        {% else %}
-            <div class="avatar placeholder">{{ user.username|first|upper }}</div>
-        {% endif %}
-        <div class="profile-info">
-            <h2>{{ user.nickname|default:user.username }}</h2>
-            <p class="profile-email">{{ user.email }}</p>
-            <p class="profile-joined">Membro desde {{ user.date_joined|date:"M Y" }}</p>
+    <!-- Header do Perfil -->
+    <div class="profile-card">
+        <div class="profile-header">
+            {% if user.profile_picture %}
+                <img src="{{ user.profile_picture.url }}" alt="Foto de Perfil" class="avatar">
+            {% else %}
+                <div class="avatar placeholder">{{ user.nickname|first|upper }}</div>
+            {% endif %}
+            
+            <h1 class="profile-name">{{ user.nickname|default:user.username }}</h1>
+            
+            {% if user.user_type == 'company' %}
+                <p class="profile-subtitle">{{ user.company_name|default:"Empresa Júnior" }}</p>
+                <span class="user-badge badge-company">🏢 Empresa Júnior</span>
+            {% else %}
+                <p class="profile-subtitle">{{ user.course|default:"Estudante" }}</p>
+                <span class="user-badge badge-student">🎓 Estudante</span>
+            {% endif %}
+            
+            <div class="meta-info">
+                <div class="meta-item">
+                    <span>📧</span>
+                    <span>{{ user.email }}</span>
+                </div>
+                <div class="meta-item">
+                    <span>📅</span>
+                    <span>Desde {{ user.date_joined|date:"M/Y" }}</span>
+                </div>
+            </div>
         </div>
-    </div>
-    
-    <div class="profile-stats">
-        <div class="stat">
-            <span class="stat-number">0</span>
-            <span class="stat-label">Posts</span>
+        
+        <!-- Informações -->
+        <div class="info-section">
+            {% if user.user_type == 'student' %}
+                <h3 class="section-title">
+                    <span>🎓</span>
+                    Informações Acadêmicas
+                </h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Curso</span>
+                        <span class="info-value">{{ user.course|default:"Não informado" }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Período</span>
+                        <span class="info-value">{{ user.semester|default:"Não informado" }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Universidade</span>
+                        <span class="info-value">{{ user.university|default:"Não informado" }}</span>
+                    </div>
+                </div>
+            {% else %}
+                <h3 class="section-title">
+                    <span>🏢</span>
+                    Informações da Empresa
+                </h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Nome</span>
+                        <span class="info-value">{{ user.company_name|default:"Não informado" }}</span>
+                    </div>
+                    {% if user.company_instagram %}
+                        <div class="info-item">
+                            <span class="info-label">Instagram</span>
+                            <a href="https://instagram.com/{{ user.company_instagram }}" target="_blank" class="instagram-link info-value">
+                                @{{ user.company_instagram }}
+                            </a>
+                        </div>
+                    {% endif %}
+                    <div class="info-item">
+                        <span class="info-label">Fundada</span>
+                        <span class="info-value">{{ user.date_joined|date:"Y" }}</span>
+                    </div>
+                </div>
+                
+                {% if user.company_description %}
+                    <div style="margin-top: 1.5rem;">
+                        <h4 class="section-title">
+                            <span>📝</span>
+                            Sobre
+                        </h4>
+                        <p style="color: #6b7280; line-height: 1.6;">
+                            {{ user.company_description }}
+                        </p>
+                    </div>
+                {% endif %}
+            {% endif %}
         </div>
-        <div class="stat">
-            <span class="stat-number">0</span>
-            <span class="stat-label">Conexões</span>
+        
+        <!-- Tags/Habilidades -->
+        <div class="tags-section">
+            <h3 class="section-title">
+                <span>⚡</span>
+                {% if user.user_type == 'student' %}Habilidades{% else %}Especialidades{% endif %}
+            </h3>
+            <div class="tags-container">
+                {% if user.user_type == 'student' %}
+                    <span class="tag">Python</span>
+                    <span class="tag">JavaScript</span>
+                    <span class="tag">React</span>
+                    <span class="tag">Design</span>
+                    <span class="tag">Excel</span>
+                    <span class="tag">Comunicação</span>
+                    <span class="tag">Liderança</span>
+                {% else %}
+                    <span class="tag">Consultoria</span>
+                    <span class="tag">Desenvolvimento Web</span>
+                    <span class="tag">Design Gráfico</span>
+                    <span class="tag">Marketing Digital</span>
+                    <span class="tag">Gestão de Projetos</span>
+                    <span class="tag">Análise de Dados</span>
+                {% endif %}
+            </div>
         </div>
-        <div class="stat">
-            <span class="stat-number">0</span>
-            <span class="stat-label">Projetos</span>
+        
+        <!-- Ações -->
+        <div class="actions">
+            <a href="#" class="btn btn-primary">
+                <span>✏️</span>
+                Editar Perfil
+            </a>
+            <a href="{% url 'messaging:conversations_list' %}" class="btn btn-secondary">
+                <span>💬</span>
+                Mensagens
+            </a>
+            <a href="{% url 'accounts:logout' %}" class="btn btn-danger">
+                <span>🚪</span>
+                Sair
+            </a>
         </div>
-    </div>
-
-    <div class="profile-actions">
-        <a href="#" class="btn btn-secondary">Editar Perfil</a>
-        <a href="/messaging/messages/" class="btn btn-secondary">Mensagens</a>
-        <a href="{% url 'accounts:logout' %}" class="btn btn-outline">Sair</a>
-    </div>
-    
-    <div class="profile-section">
-        <h3>Sobre</h3>
-        <p class="profile-bio">Bem-vindo ao InstaLab! Complete seu perfil para começar a se conectar com outros estudantes e empresas juniores.</p>
-    </div>
-    
-    <div class="profile-section">
-        <h3>Atividade Recente</h3>
-        <p class="empty-state">Nenhuma atividade ainda. Comece criando seu primeiro post!</p>
     </div>
 </div>
 {% endblock %}
