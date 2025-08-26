@@ -159,26 +159,3 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 ---
 
 **InstaLab** - Conectando talentos acadêmicos com oportunidades profissionais 🚀
-
-## 🎨 Estilo
-
-Use `#6A5ACD` para elementos de destaque (links, botões primários) e `#000000` / tons de cinza para tipografia e fundo. Manter UI limpa e focada no conteúdo (projetos e perfis).
-
-## 🧱 Próximas Melhorias Técnicas
-
-- Trocar InMemoryChannelLayer por Redis em produção
-- Servir arquivos estáticos com Nginx
-- Implementar storage S3 opcional
-- Indexação de busca (PostgreSQL trigram / Elastic opcional)
-
-## 🤝 Contribuição
-
-Pull requests são bem-vindos. Abrir issues para sugestões.
-
-## 🛡️ Licença
-
-MIT - ver `LICENSE`.
-
----
-
-Feito para a comunidade acadêmica e criativa. Construído com Django.
