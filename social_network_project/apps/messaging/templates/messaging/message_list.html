@@ -1,0 +1,11 @@
+{% extends 'core/base.html' %}
+{% block content %}
+<h2>Minhas Mensagens</h2>
+<ul>
+  {% for m in messages %}
+    <li><strong>{{ m.sender.nickname|default:m.sender.username }}</strong> → <strong>{{ m.receiver.nickname|default:m.receiver.username }}</strong>: {{ m.content }} <em>{{ m.timestamp|date:'H:i d/m' }}</em></li>
+  {% empty %}
+    <li>Nenhuma mensagem.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

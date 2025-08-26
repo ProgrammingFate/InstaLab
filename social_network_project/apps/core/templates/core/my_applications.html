@@ -1,0 +1,424 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Minhas Candidaturas - InstaLab{% endblock %}
+
+{% block content %}
+<div class="my-applications-page">
+    <div class="container">
+        <div class="page-header">
+            <h1>Minhas Candidaturas</h1>
+            <p>Acompanhe o status das suas candidaturas e mantenha-se atualizado sobre as oportunidades.</p>
+        </div>
+
+        {% if applications %}
+        <div class="applications-grid">
+            {% for application in applications %}
+            <div class="application-card">
+                <div class="card-header">
+                    <div class="job-info">
+                        <h3 class="job-title">{{ application.job.title }}</h3>
+                        <p class="company-name">{{ application.job.company.company_name|default:application.job.company.nickname }}</p>
+                    </div>
+                    <div class="status-badge status-{{ application.status }}">
+                        {% if application.status == 'applied' %}📋 Candidatado
+                        {% elif application.status == 'reviewing' %}🔍 Em Análise
+                        {% elif application.status == 'accepted' %}✅ Aceito
+                        {% elif application.status == 'rejected' %}❌ Rejeitado
+                        {% elif application.status == 'withdrawn' %}🚫 Retirado
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="card-content">
+                    <div class="job-meta">
+                        <span class="meta-item">
+                            <i>📅</i> Candidatura: {{ application.applied_at|date:"d/m/Y" }}
+                        </span>
+                        {% if application.job.location %}
+                        <span class="meta-item">
+                            <i>📍</i> {{ application.job.location }}
+                        </span>
+                        {% endif %}
+                        {% if application.job.salary_min and application.job.salary_max %}
+                        <span class="meta-item">
+                            <i>💰</i> R$ {{ application.job.salary_min|floatformat:0 }}-{{ application.job.salary_max|floatformat:0 }}/mês
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    {% if application.cover_letter %}
+                    <div class="cover-letter-preview">
+                        <h4>Carta de Apresentação:</h4>
+                        <p>{{ application.cover_letter|truncatewords:30 }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="card-actions">
+                    <a href="{% url 'core:vaga_detail' application.job.id %}" class="btn btn-secondary">
+                        Ver Vaga
+                    </a>
+                    {% if application.status == 'applied' %}
+                    <button class="btn btn-outline btn-sm" onclick="withdrawApplication({{ application.id }})">
+                        Retirar Candidatura
+                    </button>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-applications">
+            <div class="no-applications-content">
+                <span class="no-applications-icon">📋</span>
+                <h3>Você ainda não se candidatou a nenhuma vaga</h3>
+                <p>Explore as oportunidades disponíveis e candidate-se às vagas que mais te interessam!</p>
+                <a href="{% url 'core:vagas_list' %}" class="btn btn-primary btn-large">
+                    Explorar Vagas
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.my-applications-page {
+    padding: 40px 0 80px;
+    min-height: 100vh;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 50px;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.page-header h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 15px;
+}
+
+.page-header p {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+.applications-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 30px;
+    animation: fadeInUp 0.6s ease-out 0.2s both;
+}
+
+.application-card {
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 25px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.application-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.application-card:hover::before {
+    left: 100%;
+}
+
+.application-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px var(--shadow);
+    border-color: var(--primary);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+    gap: 15px;
+}
+
+.job-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 5px;
+    line-height: 1.3;
+}
+
+.company-name {
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.status-badge {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.status-applied {
+    background: linear-gradient(45deg, #3b82f6, #1d4ed8);
+    color: white;
+}
+
+.status-reviewing {
+    background: linear-gradient(45deg, #f59e0b, #d97706);
+    color: white;
+}
+
+.status-accepted {
+    background: linear-gradient(45deg, #10b981, #059669);
+    color: white;
+}
+
+.status-rejected {
+    background: linear-gradient(45deg, #ef4444, #dc2626);
+    color: white;
+}
+
+.status-withdrawn {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+}
+
+.card-content {
+    margin-bottom: 20px;
+}
+
+.job-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.cover-letter-preview {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 15px;
+}
+
+.cover-letter-preview h4 {
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.cover-letter-preview p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.card-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    padding-top: 15px;
+    border-top: 1px solid var(--border);
+}
+
+.btn {
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    white-space: nowrap;
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, var(--primary), var(--primary-light));
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(225, 48, 108, 0.4);
+    filter: brightness(1.1);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+    color: var(--text-primary);
+    text-decoration: none;
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+}
+
+.btn-outline:hover {
+    background: var(--glass);
+    border-color: #ef4444;
+    color: #ef4444;
+    text-decoration: none;
+}
+
+.btn-sm {
+    padding: 8px 16px;
+    font-size: 0.8rem;
+}
+
+.btn-large {
+    padding: 16px 32px;
+    font-size: 1.1rem;
+    border-radius: 25px;
+}
+
+/* No Applications */
+.no-applications {
+    padding: 80px 0;
+    text-align: center;
+}
+
+.no-applications-content {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.no-applications-icon {
+    font-size: 4rem;
+    display: block;
+    margin-bottom: 25px;
+}
+
+.no-applications h3 {
+    font-size: 1.8rem;
+    color: var(--text-primary);
+    margin-bottom: 15px;
+    font-weight: 700;
+}
+
+.no-applications p {
+    color: var(--text-secondary);
+    margin-bottom: 30px;
+    line-height: 1.6;
+    font-size: 1.1rem;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .applications-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .page-header h1 {
+        font-size: 2rem;
+    }
+    
+    .page-header p {
+        font-size: 1rem;
+    }
+    
+    .application-card {
+        padding: 20px;
+    }
+    
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .card-actions {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .job-meta {
+        gap: 6px;
+    }
+}
+
+@media (max-width: 480px) {
+    .my-applications-page {
+        padding: 20px 0 60px;
+    }
+    
+    .page-header h1 {
+        font-size: 1.6rem;
+    }
+    
+    .application-card {
+        padding: 15px;
+    }
+    
+    .job-title {
+        font-size: 1.1rem;
+    }
+    
+    .company-name {
+        font-size: 0.9rem;
+    }
+}
+</style>
+
+<script>
+function withdrawApplication(applicationId) {
+    if (confirm('Tem certeza que deseja retirar sua candidatura? Esta ação não pode ser desfeita.')) {
+        // Aqui você implementaria a lógica AJAX para retirar a candidatura
+        // Por enquanto, apenas mostra uma mensagem
+        alert('Funcionalidade será implementada em breve!');
+    }
+}
+</script>
+{% endblock %}

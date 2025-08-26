@@ -1,0 +1,590 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Vagas de Estágio - InstaLab{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="vagas-hero">
+    <div class="container">
+        <div class="hero-content">
+            <h1 class="page-title">
+                Vagas de <span class="gradient-text">Estágio</span>
+            </h1>
+            <p class="page-description">
+                Descubra oportunidades incríveis em empresas juniores, startups e laboratórios de pesquisa. 
+                Conecte-se com projetos que vão impulsionar sua carreira.
+            </p>
+            <div class="search-bar">
+                <input type="text" placeholder="Buscar por área, empresa ou tecnologia..." class="search-input">
+                <button class="search-btn">
+                    <span>🔍</span>
+                    Buscar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filtros -->
+<div class="filters-section">
+    <div class="container">
+        <div class="filters-grid">
+            <button class="filter-btn active">Todas</button>
+            <button class="filter-btn">Desenvolvimento</button>
+            <button class="filter-btn">Design</button>
+            <button class="filter-btn">Marketing</button>
+            <button class="filter-btn">Pesquisa</button>
+            <button class="filter-btn">Inovação</button>
+        </div>
+    </div>
+</div>
+
+<!-- Cards de Vagas -->
+<div class="vagas-section">
+    <div class="container">
+        <div class="vagas-grid">
+            <!-- Vaga 1 -->
+            <div class="vaga-card" data-category="desenvolvimento">
+                <div class="vaga-header">
+                    <div class="company-logo gradient-bg-1">
+                        <span>💻</span>
+                    </div>
+                    <div class="vaga-status urgente">Urgente</div>
+                </div>
+                <div class="vaga-content">
+                    <h3 class="vaga-title">Desenvolvedor Frontend React</h3>
+                    <p class="company-name">TechJr - Empresa Júnior de Computação</p>
+                    <p class="vaga-description">
+                        Desenvolvimento de interfaces modernas com React, TypeScript e Tailwind CSS. 
+                        Experiência com projetos reais para clientes.
+                    </p>
+                    <div class="vaga-tags">
+                        <span class="tag">React</span>
+                        <span class="tag">TypeScript</span>
+                        <span class="tag">Tailwind</span>
+                    </div>
+                </div>
+                <div class="vaga-footer">
+                    <div class="vaga-info">
+                        <span class="vagas-restantes">3 vagas restantes</span>
+                        <span class="salario">R$ 800-1200/mês</span>
+                    </div>
+                    <button class="apply-btn">Candidatar-se</button>
+                </div>
+            </div>
+
+            <!-- Vaga 2 -->
+            <div class="vaga-card" data-category="design">
+                <div class="vaga-header">
+                    <div class="company-logo gradient-bg-2">
+                        <span>🎨</span>
+                    </div>
+                    <div class="vaga-status novo">Novo</div>
+                </div>
+                <div class="vaga-content">
+                    <h3 class="vaga-title">Designer UX/UI</h3>
+                    <p class="company-name">CreativeHub - Laboratório de Design</p>
+                    <p class="vaga-description">
+                        Criação de experiências digitais inovadoras. Trabalhe com Figma, prototipagem 
+                        e pesquisa de usuários em projetos reais.
+                    </p>
+                    <div class="vaga-tags">
+                        <span class="tag">Figma</span>
+                        <span class="tag">UX Research</span>
+                        <span class="tag">Prototipagem</span>
+                    </div>
+                </div>
+                <div class="vaga-footer">
+                    <div class="vaga-info">
+                        <span class="vagas-restantes">2 vagas restantes</span>
+                        <span class="salario">R$ 700-1000/mês</span>
+                    </div>
+                    <button class="apply-btn">Candidatar-se</button>
+                </div>
+            </div>
+
+            <!-- Vaga 3 -->
+            <div class="vaga-card" data-category="pesquisa">
+                <div class="vaga-header">
+                    <div class="company-logo gradient-bg-3">
+                        <span>🔬</span>
+                    </div>
+                    <div class="vaga-status destaque">Destaque</div>
+                </div>
+                <div class="vaga-content">
+                    <h3 class="vaga-title">Pesquisador IA & Machine Learning</h3>
+                    <p class="company-name">AI Lab - Laboratório de Inteligência Artificial</p>
+                    <p class="vaga-description">
+                        Desenvolvimento de algoritmos de ML e análise de dados. Oportunidade única 
+                        de trabalhar com pesquisa de ponta em IA.
+                    </p>
+                    <div class="vaga-tags">
+                        <span class="tag">Python</span>
+                        <span class="tag">TensorFlow</span>
+                        <span class="tag">Data Science</span>
+                    </div>
+                </div>
+                <div class="vaga-footer">
+                    <div class="vaga-info">
+                        <span class="vagas-restantes">1 vaga restante</span>
+                        <span class="salario">R$ 1000-1500/mês</span>
+                    </div>
+                    <button class="apply-btn">Candidatar-se</button>
+                </div>
+            </div>
+
+            <!-- Vaga 4 -->
+            <div class="vaga-card" data-category="marketing">
+                <div class="vaga-header">
+                    <div class="company-logo gradient-bg-4">
+                        <span>📊</span>
+                    </div>
+                    <div class="vaga-status normal">Disponível</div>
+                </div>
+                <div class="vaga-content">
+                    <h3 class="vaga-title">Marketing Digital & Growth</h3>
+                    <p class="company-name">GrowthJr - Consultoria em Crescimento</p>
+                    <p class="vaga-description">
+                        Estratégias de marketing digital, análise de métricas e growth hacking. 
+                        Aprenda com cases reais de startups e empresas.
+                    </p>
+                    <div class="vaga-tags">
+                        <span class="tag">Google Ads</span>
+                        <span class="tag">Analytics</span>
+                        <span class="tag">SEO</span>
+                    </div>
+                </div>
+                <div class="vaga-footer">
+                    <div class="vaga-info">
+                        <span class="vagas-restantes">4 vagas restantes</span>
+                        <span class="salario">R$ 600-900/mês</span>
+                    </div>
+                    <button class="apply-btn">Candidatar-se</button>
+                </div>
+            </div>
+
+            <!-- Vaga 5 -->
+            <div class="vaga-card" data-category="desenvolvimento">
+                <div class="vaga-header">
+                    <div class="company-logo gradient-bg-1">
+                        <span>⚡</span>
+                    </div>
+                    <div class="vaga-status novo">Novo</div>
+                </div>
+                <div class="vaga-content">
+                    <h3 class="vaga-title">Desenvolvedor Mobile Flutter</h3>
+                    <p class="company-name">MobileFirst - Startup de Apps</p>
+                    <p class="vaga-description">
+                        Desenvolvimento de aplicativos mobile multiplataforma com Flutter. 
+                        Projetos inovadores e ambiente startup.
+                    </p>
+                    <div class="vaga-tags">
+                        <span class="tag">Flutter</span>
+                        <span class="tag">Dart</span>
+                        <span class="tag">Firebase</span>
+                    </div>
+                </div>
+                <div class="vaga-footer">
+                    <div class="vaga-info">
+                        <span class="vagas-restantes">2 vagas restantes</span>
+                        <span class="salario">R$ 900-1300/mês</span>
+                    </div>
+                    <button class="apply-btn">Candidatar-se</button>
+                </div>
+            </div>
+
+            <!-- Vaga 6 -->
+            <div class="vaga-card" data-category="inovacao">
+                <div class="vaga-header">
+                    <div class="company-logo gradient-bg-2">
+                        <span>🚀</span>
+                    </div>
+                    <div class="vaga-status destaque">Destaque</div>
+                </div>
+                <div class="vaga-content">
+                    <h3 class="vaga-title">Inovação & Empreendedorismo</h3>
+                    <p class="company-name">InnovateLab - Incubadora de Startups</p>
+                    <p class="vaga-description">
+                        Apoio a startups nascentes, validação de modelos de negócio e desenvolvimento 
+                        de produtos inovadores do zero.
+                    </p>
+                    <div class="vaga-tags">
+                        <span class="tag">Business Model</span>
+                        <span class="tag">MVP</span>
+                        <span class="tag">Lean Startup</span>
+                    </div>
+                </div>
+                <div class="vaga-footer">
+                    <div class="vaga-info">
+                        <span class="vagas-restantes">3 vagas restantes</span>
+                        <span class="salario">R$ 800-1100/mês</span>
+                    </div>
+                    <button class="apply-btn">Candidatar-se</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA Section -->
+<div class="vagas-cta">
+    <div class="container">
+        <div class="cta-content">
+            <h2>Não encontrou a vaga ideal?</h2>
+            <p>Cadastre seu perfil e receba notificações de novas oportunidades que combinam com você.</p>
+            <a href="#" class="btn btn-primary btn-large">Criar Alerta de Vagas</a>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Vagas Hero Section */
+.vagas-hero {
+    padding: 80px 0 60px;
+    background: radial-gradient(ellipse at center, rgba(225, 48, 108, 0.1) 0%, transparent 70%);
+    position: relative;
+}
+
+.page-title {
+    font-size: 3rem;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 20px;
+    color: var(--text-primary);
+    animation: fadeInUp 1s ease-out;
+}
+
+.page-description {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto 40px;
+    line-height: 1.6;
+    animation: fadeInUp 1s ease-out 0.2s both;
+}
+
+.search-bar {
+    display: flex;
+    max-width: 500px;
+    margin: 0 auto;
+    gap: 12px;
+    animation: fadeInUp 1s ease-out 0.4s both;
+}
+
+.search-input {
+    flex: 1;
+    padding: 16px 20px;
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 25px;
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(225, 48, 108, 0.1);
+}
+
+.search-input::placeholder {
+    color: var(--text-secondary);
+}
+
+.search-btn {
+    padding: 16px 24px;
+    background: linear-gradient(45deg, var(--primary), var(--primary-light));
+    border: none;
+    border-radius: 25px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.search-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(225, 48, 108, 0.4);
+}
+
+/* Filtros */
+.filters-section {
+    padding: 40px 0;
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.filters-grid {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 12px 24px;
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    color: var(--text-primary);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-btn:hover,
+.filter-btn.active {
+    background: linear-gradient(45deg, var(--primary), var(--primary-light));
+    border-color: var(--primary);
+    transform: translateY(-1px);
+}
+
+/* Seção de Vagas */
+.vagas-section {
+    padding: 60px 0;
+}
+
+.vagas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 30px;
+}
+
+/* Card de Vaga */
+.vaga-card {
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 30px;
+    transition: all 0.3s ease;
+    animation: fadeInUp 1s ease-out;
+    position: relative;
+    overflow: hidden;
+}
+
+.vaga-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.vaga-card:hover::before {
+    left: 100%;
+}
+
+.vaga-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px var(--shadow);
+    border-color: var(--primary);
+}
+
+.vaga-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.company-logo {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.vaga-status {
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.vaga-status.urgente {
+    background: linear-gradient(45deg, #ef4444, #dc2626);
+    color: white;
+}
+
+.vaga-status.novo {
+    background: linear-gradient(45deg, #10b981, #059669);
+    color: white;
+}
+
+.vaga-status.destaque {
+    background: linear-gradient(45deg, var(--primary), var(--primary-light));
+    color: white;
+}
+
+.vaga-status.normal {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+}
+
+.vaga-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.company-name {
+    color: var(--primary);
+    font-weight: 600;
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+}
+
+.vaga-description {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.vaga-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.tag {
+    padding: 4px 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.vaga-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+}
+
+.vaga-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.vagas-restantes {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.salario {
+    font-weight: 700;
+    color: var(--primary);
+    font-size: 1rem;
+}
+
+.apply-btn {
+    padding: 12px 24px;
+    background: linear-gradient(45deg, var(--primary), var(--primary-light));
+    border: none;
+    border-radius: 16px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.apply-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(225, 48, 108, 0.4);
+    filter: brightness(1.1);
+}
+
+/* CTA Section */
+.vagas-cta {
+    padding: 80px 0;
+    background: linear-gradient(135deg, rgba(225, 48, 108, 0.1), rgba(131, 58, 180, 0.1));
+    text-align: center;
+}
+
+.vagas-cta h2 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--text-primary);
+}
+
+.vagas-cta p {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin-bottom: 30px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .vagas-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .page-title {
+        font-size: 2.2rem;
+    }
+    
+    .search-bar {
+        flex-direction: column;
+    }
+    
+    .vaga-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .apply-btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .vagas-section {
+        padding: 40px 0;
+    }
+    
+    .vaga-card {
+        padding: 20px;
+    }
+    
+    .filters-grid {
+        gap: 8px;
+    }
+    
+    .filter-btn {
+        padding: 10px 16px;
+        font-size: 0.9rem;
+    }
+}
+</style>
+{% endblock %}

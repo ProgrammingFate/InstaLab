@@ -1,0 +1,610 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Vagas de Estágio - InstaLab{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="vagas-hero">
+    <div class="container">
+        <div class="hero-content">
+            <h1 class="page-title">
+                Vagas de <span class="gradient-text">Estágio</span>
+            </h1>
+            <p class="page-description">
+                Descubra oportunidades incríveis em empresas juniores, startups e laboratórios de pesquisa. 
+                Conecte-se com projetos que vão impulsionar sua carreira.
+            </p>
+            
+            <!-- Barra de Busca Funcional -->
+            <form class="search-bar" method="GET">
+                <input type="text" name="q" value="{{ search_query|default:'' }}" 
+                       placeholder="Buscar por área, empresa ou tecnologia..." class="search-input">
+                <button type="submit" class="search-btn">
+                    <span>🔍</span>
+                    Buscar
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Filtros Funcionais -->
+<div class="filters-section">
+    <div class="container">
+        <div class="filters-header">
+            <div class="filters-grid">
+                <a href="{% url 'core:vagas_list' %}" 
+                   class="filter-btn {% if not current_category %}active{% endif %}">
+                   Todas
+                </a>
+                {% for category in categories %}
+                <a href="{% url 'core:vagas_list' %}?category={{ category.slug }}" 
+                   class="filter-btn {% if current_category == category.slug %}active{% endif %}">
+                   {{ category.icon }} {{ category.name }}
+                </a>
+                {% endfor %}
+            </div>
+            
+            {% if user.is_company %}
+            <div class="create-job-btn">
+                <a href="{% url 'core:create_job' %}" class="btn btn-primary">
+                    + Criar Vaga
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Cards de Vagas Dinâmicos -->
+<div class="vagas-section">
+    <div class="container">
+        {% if page_obj %}
+        <div class="vagas-grid">
+            {% for job in page_obj %}
+            <div class="vaga-card" data-category="{{ job.category.slug }}">
+                <div class="vaga-header">
+                    <div class="company-logo gradient-bg-{{ forloop.counter|add:1 }}">
+                        <span>{{ job.category.icon }}</span>
+                    </div>
+                    <div class="vaga-status {% if job.priority == 'urgent' %}urgente{% elif job.priority == 'featured' %}destaque{% else %}normal{% endif %}">
+                        {% if job.priority == 'urgent' %}Urgente
+                        {% elif job.priority == 'featured' %}Destaque
+                        {% else %}Disponível{% endif %}
+                    </div>
+                </div>
+                <div class="vaga-content">
+                    <h3 class="vaga-title">{{ job.title }}</h3>
+                    <p class="company-name">{{ job.company.company_name|default:job.company.nickname }}</p>
+                    <p class="vaga-description">
+                        {{ job.description|truncatewords:25 }}
+                    </p>
+                    {% if job.get_tags_list %}
+                    <div class="vaga-tags">
+                        {% for tag in job.get_tags_list|slice:":3" %}
+                        <span class="tag">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="vaga-footer">
+                    <div class="vaga-info">
+                        <span class="vagas-restantes">{{ job.spots_remaining }} vaga{{ job.spots_remaining|pluralize }} restante{{ job.spots_remaining|pluralize }}</span>
+                        {% if job.salary_min and job.salary_max %}
+                        <span class="salario">R$ {{ job.salary_min|floatformat:0 }}-{{ job.salary_max|floatformat:0 }}/mês</span>
+                        {% endif %}
+                    </div>
+                    <a href="{% url 'core:vaga_detail' job.id %}" class="apply-btn">Ver Detalhes</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Paginação -->
+        {% if page_obj.has_other_pages %}
+        <div class="pagination-wrapper">
+            <nav class="pagination">
+                {% if page_obj.has_previous %}
+                    <a href="?page=1{% if search_query %}&q={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}" class="page-link">Primeira</a>
+                    <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}" class="page-link">Anterior</a>
+                {% endif %}
+                
+                <span class="page-info">
+                    Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}
+                </span>
+                
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}" class="page-link">Próxima</a>
+                    <a href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&q={{ search_query }}{% endif %}{% if current_category %}&category={{ current_category }}{% endif %}" class="page-link">Última</a>
+                {% endif %}
+            </nav>
+        </div>
+        {% endif %}
+        
+        {% else %}
+        <div class="no-results">
+            <div class="no-results-content">
+                <span class="no-results-icon">🔍</span>
+                <h3>Nenhuma vaga encontrada</h3>
+                <p>Tente ajustar os filtros ou buscar por outros termos.</p>
+                <a href="{% url 'core:vagas_list' %}" class="btn btn-primary">Ver Todas as Vagas</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- CTA Section -->
+<div class="vagas-cta">
+    <div class="container">
+        <div class="cta-content">
+            {% if user.is_student %}
+            <h2>Não encontrou a vaga ideal?</h2>
+            <p>Cadastre alertas e receba notificações de novas oportunidades que combinam com você.</p>
+            <a href="{% url 'core:my_applications' %}" class="btn btn-primary btn-large">Ver Minhas Candidaturas</a>
+            {% else %}
+            <h2>Procurando talentos?</h2>
+            <p>Publique suas vagas e encontre os melhores estudantes para sua equipe.</p>
+            <a href="{% url 'core:create_job' %}" class="btn btn-primary btn-large">Criar Nova Vaga</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+/* Mantém todos os estilos existentes */
+.vagas-hero {
+    padding: 80px 0 60px;
+    background: radial-gradient(ellipse at center, rgba(225, 48, 108, 0.1) 0%, transparent 70%);
+    position: relative;
+}
+
+.page-title {
+    font-size: 3rem;
+    font-weight: 800;
+    text-align: center;
+    margin-bottom: 20px;
+    color: var(--text-primary);
+    animation: fadeInUp 1s ease-out;
+}
+
+.page-description {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto 40px;
+    line-height: 1.6;
+    animation: fadeInUp 1s ease-out 0.2s both;
+}
+
+.search-bar {
+    display: flex;
+    max-width: 500px;
+    margin: 0 auto;
+    gap: 12px;
+    animation: fadeInUp 1s ease-out 0.4s both;
+}
+
+.search-input {
+    flex: 1;
+    padding: 16px 20px;
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 25px;
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(225, 48, 108, 0.1);
+}
+
+.search-input::placeholder {
+    color: var(--text-secondary);
+}
+
+.search-btn {
+    padding: 16px 24px;
+    background: linear-gradient(45deg, var(--primary), var(--primary-light));
+    border: none;
+    border-radius: 25px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.search-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(225, 48, 108, 0.4);
+}
+
+/* Filtros */
+.filters-section {
+    padding: 40px 0;
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.filters-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.filters-grid {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 12px 24px;
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    color: var(--text-primary);
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-block;
+}
+
+.filter-btn:hover,
+.filter-btn.active {
+    background: linear-gradient(45deg, var(--primary), var(--primary-light));
+    border-color: var(--primary);
+    transform: translateY(-1px);
+    color: white;
+    text-decoration: none;
+}
+
+.create-job-btn .btn {
+    padding: 12px 24px;
+    border-radius: 20px;
+    white-space: nowrap;
+}
+
+/* Cards de Vagas */
+.vagas-section {
+    padding: 60px 0;
+}
+
+.vagas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 30px;
+}
+
+.vaga-card {
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 30px;
+    transition: all 0.3s ease;
+    animation: fadeInUp 1s ease-out;
+    position: relative;
+    overflow: hidden;
+}
+
+.vaga-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.5s ease;
+}
+
+.vaga-card:hover::before {
+    left: 100%;
+}
+
+.vaga-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px var(--shadow);
+    border-color: var(--primary);
+}
+
+.vaga-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.company-logo {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+}
+
+.gradient-bg-1 { background: linear-gradient(45deg, #667eea, #764ba2); }
+.gradient-bg-2 { background: linear-gradient(45deg, #f093fb, #f5576c); }
+.gradient-bg-3 { background: linear-gradient(45deg, #4facfe, #00f2fe); }
+.gradient-bg-4 { background: linear-gradient(45deg, #43e97b, #38f9d7); }
+.gradient-bg-5 { background: linear-gradient(45deg, #fa709a, #fee140); }
+.gradient-bg-6 { background: linear-gradient(45deg, #a8edea, #fed6e3); }
+
+.vaga-status {
+    padding: 6px 12px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.vaga-status.urgente {
+    background: linear-gradient(45deg, #ef4444, #dc2626);
+    color: white;
+}
+
+.vaga-status.destaque {
+    background: linear-gradient(45deg, var(--primary), var(--primary-light));
+    color: white;
+}
+
+.vaga-status.normal {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+}
+
+.vaga-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.company-name {
+    color: var(--primary);
+    font-weight: 600;
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+}
+
+.vaga-description {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.vaga-tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.tag {
+    padding: 4px 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.vaga-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+}
+
+.vaga-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.vagas-restantes {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.salario {
+    font-weight: 700;
+    color: var(--primary);
+    font-size: 1rem;
+}
+
+.apply-btn {
+    padding: 12px 24px;
+    background: linear-gradient(45deg, var(--primary), var(--primary-light));
+    border: none;
+    border-radius: 16px;
+    color: white;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+.apply-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(225, 48, 108, 0.4);
+    filter: brightness(1.1);
+    color: white;
+    text-decoration: none;
+}
+
+/* Paginação */
+.pagination-wrapper {
+    margin-top: 60px;
+    display: flex;
+    justify-content: center;
+}
+
+.pagination {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    padding: 20px 30px;
+    border-radius: 50px;
+    border: 1px solid var(--border);
+}
+
+.page-link {
+    padding: 10px 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border);
+    border-radius: 25px;
+    color: var(--text-primary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.page-link:hover {
+    background: var(--primary);
+    color: white;
+    text-decoration: none;
+    transform: translateY(-1px);
+}
+
+.page-info {
+    color: var(--text-primary);
+    font-weight: 600;
+    padding: 0 15px;
+}
+
+/* No Results */
+.no-results {
+    padding: 80px 0;
+    text-align: center;
+}
+
+.no-results-content {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.no-results-icon {
+    font-size: 4rem;
+    display: block;
+    margin-bottom: 20px;
+}
+
+.no-results h3 {
+    font-size: 1.8rem;
+    color: var(--text-primary);
+    margin-bottom: 15px;
+}
+
+.no-results p {
+    color: var(--text-secondary);
+    margin-bottom: 30px;
+    line-height: 1.6;
+}
+
+/* CTA Section */
+.vagas-cta {
+    padding: 80px 0;
+    background: linear-gradient(135deg, rgba(225, 48, 108, 0.1), rgba(131, 58, 180, 0.1));
+    text-align: center;
+}
+
+.vagas-cta h2 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--text-primary);
+}
+
+.vagas-cta p {
+    font-size: 1.1rem;
+    color: var(--text-secondary);
+    margin-bottom: 30px;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .vagas-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .page-title {
+        font-size: 2.2rem;
+    }
+    
+    .search-bar {
+        flex-direction: column;
+    }
+    
+    .filters-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filters-grid {
+        justify-content: center;
+    }
+    
+    .vaga-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .apply-btn {
+        width: 100%;
+        text-align: center;
+    }
+    
+    .pagination {
+        flex-wrap: wrap;
+        padding: 15px 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .vagas-section {
+        padding: 40px 0;
+    }
+    
+    .vaga-card {
+        padding: 20px;
+    }
+    
+    .filters-grid {
+        gap: 8px;
+    }
+    
+    .filter-btn {
+        padding: 10px 16px;
+        font-size: 0.9rem;
+    }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,460 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Candidatar-se - {{ job.title }}{% endblock %}
+
+{% block content %}
+<div class="apply-page">
+    <div class="container">
+        <div class="apply-header">
+            <h1>Candidatar-se à Vaga</h1>
+            <div class="job-summary">
+                <h2>{{ job.title }}</h2>
+                <p>{{ job.company.company_name|default:job.company.nickname }}</p>
+            </div>
+        </div>
+
+        <div class="apply-content">
+            <div class="apply-form-section">
+                <form method="post" enctype="multipart/form-data" class="apply-form">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="{{ form.cover_letter.id_for_label }}">{{ form.cover_letter.label }}</label>
+                        {{ form.cover_letter }}
+                        {% if form.cover_letter.help_text %}
+                        <small class="form-help">{{ form.cover_letter.help_text }}</small>
+                        {% endif %}
+                        {% if form.cover_letter.errors %}
+                        <div class="form-errors">
+                            {% for error in form.cover_letter.errors %}
+                            <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.resume.id_for_label }}">{{ form.resume.label }}</label>
+                        {{ form.resume }}
+                        {% if form.resume.help_text %}
+                        <small class="form-help">{{ form.resume.help_text }}</small>
+                        {% endif %}
+                        <small class="form-help">Formatos aceitos: PDF, DOC, DOCX (máx. 5MB)</small>
+                        {% if form.resume.errors %}
+                        <div class="form-errors">
+                            {% for error in form.resume.errors %}
+                            <span class="error">{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-actions">
+                        <a href="{% url 'core:vaga_detail' job.id %}" class="btn btn-secondary">Cancelar</a>
+                        <button type="submit" class="btn btn-primary">
+                            <span>📋</span> Enviar Candidatura
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="job-info-sidebar">
+                <div class="sidebar-card">
+                    <h3>Resumo da Vaga</h3>
+                    <div class="job-quick-info">
+                        <div class="company-header">
+                            <div class="company-logo gradient-bg-{{ job.id|add:1 }}">
+                                <span>{{ job.category.icon }}</span>
+                            </div>
+                            <div>
+                                <h4>{{ job.title }}</h4>
+                                <p>{{ job.company.company_name|default:job.company.nickname }}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="quick-details">
+                            <div class="detail-row">
+                                <span class="label">📍 Localização:</span>
+                                <span class="value">{{ job.location|default:"Não especificado" }}</span>
+                            </div>
+                            {% if job.remote_work %}
+                            <div class="detail-row">
+                                <span class="label">🌐 Remoto:</span>
+                                <span class="value remote">Sim</span>
+                            </div>
+                            {% endif %}
+                            {% if job.salary_min and job.salary_max %}
+                            <div class="detail-row">
+                                <span class="label">💰 Salário:</span>
+                                <span class="value">R$ {{ job.salary_min|floatformat:0 }}-{{ job.salary_max|floatformat:0 }}/mês</span>
+                            </div>
+                            {% endif %}
+                            <div class="detail-row">
+                                <span class="label">👥 Vagas:</span>
+                                <span class="value">{{ job.spots_remaining }} restante{{ job.spots_remaining|pluralize }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-card tips-card">
+                    <h3>💡 Dicas para uma boa candidatura</h3>
+                    <ul class="tips-list">
+                        <li>Seja específico sobre sua experiência relevante</li>
+                        <li>Mencione projetos que demonstrem suas habilidades</li>
+                        <li>Explique por que tem interesse na empresa</li>
+                        <li>Seja autêntico e mostre sua personalidade</li>
+                        <li>Verifique se seu currículo está atualizado</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.apply-page {
+    padding: 40px 0 80px;
+    min-height: 100vh;
+}
+
+.apply-header {
+    text-align: center;
+    margin-bottom: 50px;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.apply-header h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+}
+
+.job-summary {
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 25px;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.job-summary h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.job-summary p {
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.apply-content {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 40px;
+    animation: fadeInUp 0.6s ease-out 0.2s both;
+}
+
+.apply-form-section {
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px;
+}
+
+.apply-form {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-group label {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+.form-group textarea,
+.form-group input[type="file"] {
+    padding: 16px 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    resize: vertical;
+}
+
+.form-group textarea:focus,
+.form-group input[type="file"]:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(225, 48, 108, 0.1);
+}
+
+.form-group textarea::placeholder {
+    color: var(--text-secondary);
+}
+
+.form-group textarea {
+    min-height: 150px;
+    font-family: inherit;
+    line-height: 1.6;
+}
+
+.form-help {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+.form-errors {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.error {
+    color: #ef4444;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.form-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+    margin-top: 20px;
+}
+
+.btn {
+    padding: 16px 32px;
+    border-radius: 16px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, var(--primary), var(--primary-light));
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(225, 48, 108, 0.4);
+    filter: brightness(1.1);
+    color: white;
+    text-decoration: none;
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+    color: var(--text-primary);
+    text-decoration: none;
+}
+
+.job-info-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.sidebar-card {
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 25px;
+}
+
+.sidebar-card h3 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+}
+
+.company-header {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.company-logo {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    color: white;
+    flex-shrink: 0;
+}
+
+.gradient-bg-1 { background: linear-gradient(45deg, #667eea, #764ba2); }
+.gradient-bg-2 { background: linear-gradient(45deg, #f093fb, #f5576c); }
+.gradient-bg-3 { background: linear-gradient(45deg, #4facfe, #00f2fe); }
+.gradient-bg-4 { background: linear-gradient(45deg, #43e97b, #38f9d7); }
+.gradient-bg-5 { background: linear-gradient(45deg, #fa709a, #fee140); }
+
+.company-header h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.company-header p {
+    color: var(--primary);
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.quick-details {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.detail-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-row .label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.detail-row .value {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.detail-row .value.remote {
+    color: var(--primary);
+}
+
+.tips-card {
+    background: linear-gradient(135deg, rgba(225, 48, 108, 0.1), rgba(131, 58, 180, 0.1));
+    border-color: rgba(225, 48, 108, 0.3);
+}
+
+.tips-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.tips-list li {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    padding-left: 20px;
+    position: relative;
+}
+
+.tips-list li::before {
+    content: '•';
+    color: var(--primary);
+    font-weight: bold;
+    position: absolute;
+    left: 0;
+}
+
+/* Responsividade */
+@media (max-width: 1024px) {
+    .apply-content {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+}
+
+@media (max-width: 768px) {
+    .apply-header h1 {
+        font-size: 2rem;
+    }
+    
+    .apply-form-section {
+        padding: 25px;
+    }
+    
+    .form-actions {
+        flex-direction: column-reverse;
+    }
+    
+    .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .sidebar-card {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .apply-page {
+        padding: 20px 0 60px;
+    }
+    
+    .apply-header h1 {
+        font-size: 1.6rem;
+    }
+    
+    .job-summary {
+        padding: 20px;
+    }
+    
+    .apply-form-section {
+        padding: 20px;
+    }
+    
+    .form-group textarea {
+        min-height: 120px;
+    }
+}
+</style>
+{% endblock %}

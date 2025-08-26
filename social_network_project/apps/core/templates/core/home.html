@@ -1,0 +1,132 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}InstaLab - Conectando Estudantes e Empresas Juniores{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="hero-container">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1 class="hero-title">
+                    Conecte-se com 
+                    <span class="gradient-text">estudantes</span> 
+                    e <span class="gradient-text">empresas juniores</span>
+                </h1>
+                <p class="hero-description">
+                    A plataforma ideal para estudantes, empresas juniores, laboratórios de pesquisa 
+                    e entusiastas compartilharem projetos, colaborarem e construírem o futuro juntos.
+                </p>
+                <div class="hero-buttons">
+                    {% if not user.is_authenticated %}
+                        <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-large">
+                            Começar Agora
+                        </a>
+                        <a href="{% url 'accounts:login' %}" class="btn btn-outline btn-large">
+                            Fazer Login
+                        </a>
+                    {% else %}
+                        <a href="{% url 'accounts:profile' %}" class="btn btn-primary btn-large">
+                            Bem-vindo, {{ user.first_name|default:user.username }}!
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="hero-visual">
+                <div class="floating-cards">
+                    <div class="card card-1">
+                        <div class="card-avatar gradient-bg-1"></div>
+                        <div class="card-content">
+                            <h4>Empresa Júnior</h4>
+                            <p>Desenvolvimento Web</p>
+                        </div>
+                    </div>
+                    <div class="card card-2">
+                        <div class="card-avatar gradient-bg-2"></div>
+                        <div class="card-content">
+                            <h4>Lab. de IA</h4>
+                            <p>Machine Learning</p>
+                        </div>
+                    </div>
+                    <div class="card card-3">
+                        <div class="card-avatar gradient-bg-3"></div>
+                        <div class="card-content">
+                            <h4>Estudante</h4>
+                            <p>Design UX/UI</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="features-section">
+    <div class="container">
+        <h2 class="section-title">Por que escolher o <span class="gradient-text">InstaLab</span>?</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon gradient-bg-1">💼</div>
+                <h3>Networking Profissional</h3>
+                <p>Conecte-se com empresas juniores, laboratórios de pesquisa e profissionais da sua área.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon gradient-bg-2">🔬</div>
+                <h3>Projetos Colaborativos</h3>
+                <p>Encontre parceiros para seus projetos e colabore em iniciativas inovadoras.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon gradient-bg-3">📚</div>
+                <h3>Compartilhamento de Conhecimento</h3>
+                <p>Publique seus projetos, aprenda com outros e construa seu portfólio acadêmico.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon gradient-bg-4">🎯</div>
+                <h3>Oportunidades Exclusivas</h3>
+                <p>Descubra vagas, estágios e oportunidades exclusivas para estudantes.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Section -->
+<div class="stats-section">
+    <div class="container">
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-number">500+</div>
+                <div class="stat-label">Estudantes Conectados</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">150+</div>
+                <div class="stat-label">Empresas Juniores</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">200+</div>
+                <div class="stat-label">Projetos Compartilhados</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">50+</div>
+                <div class="stat-label">Laboratórios de Pesquisa</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CTA Section -->
+<div class="cta-section">
+    <div class="container">
+        <div class="cta-content">
+            <h2>Pronto para começar sua jornada?</h2>
+            <p>Junte-se à comunidade que está transformando a forma como estudantes e empresas se conectam.</p>
+            {% if not user.is_authenticated %}
+                <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-large">
+                    Criar Conta Gratuita
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

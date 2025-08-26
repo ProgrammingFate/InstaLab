@@ -1,0 +1,6 @@
+<h1>Lista de Mensagens</h1>
+<ul>
+  {% for message in messages %}
+    <li>{{ message.content }} - {{ message.sender }}</li>
+  {% endfor %}
+</ul>

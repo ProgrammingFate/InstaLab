@@ -1,0 +1,52 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Perfil - {{ user.nickname }}{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">
+        {% if user.profile_picture %}
+            <img src="{{ user.profile_picture.url }}" alt="Foto de Perfil" class="avatar">
+        {% else %}
+            <div class="avatar placeholder">{{ user.username|first|upper }}</div>
+        {% endif %}
+        <div class="profile-info">
+            <h2>{{ user.nickname|default:user.username }}</h2>
+            <p class="profile-email">{{ user.email }}</p>
+            <p class="profile-joined">Membro desde {{ user.date_joined|date:"M Y" }}</p>
+        </div>
+    </div>
+    
+    <div class="profile-stats">
+        <div class="stat">
+            <span class="stat-number">0</span>
+            <span class="stat-label">Posts</span>
+        </div>
+        <div class="stat">
+            <span class="stat-number">0</span>
+            <span class="stat-label">Conexões</span>
+        </div>
+        <div class="stat">
+            <span class="stat-number">0</span>
+            <span class="stat-label">Projetos</span>
+        </div>
+    </div>
+
+    <div class="profile-actions">
+        <a href="#" class="btn btn-secondary">Editar Perfil</a>
+        <a href="/messaging/messages/" class="btn btn-secondary">Mensagens</a>
+        <a href="{% url 'accounts:logout' %}" class="btn btn-outline">Sair</a>
+    </div>
+    
+    <div class="profile-section">
+        <h3>Sobre</h3>
+        <p class="profile-bio">Bem-vindo ao InstaLab! Complete seu perfil para começar a se conectar com outros estudantes e empresas juniores.</p>
+    </div>
+    
+    <div class="profile-section">
+        <h3>Atividade Recente</h3>
+        <p class="empty-state">Nenhuma atividade ainda. Comece criando seu primeiro post!</p>
+    </div>
+</div>
+{% endblock %}

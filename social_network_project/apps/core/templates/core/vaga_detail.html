@@ -1,0 +1,608 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}{{ job.title }} - {{ job.company.company_name|default:job.company.nickname }}{% endblock %}
+
+{% block content %}
+<div class="job-detail-page">
+    <div class="container">
+        <!-- Header da Vaga -->
+        <div class="job-header">
+            <div class="job-header-content">
+                <div class="company-info">
+                    <div class="company-logo gradient-bg-{{ job.id|add:1 }}">
+                        <span>{{ job.category.icon }}</span>
+                    </div>
+                    <div class="company-details">
+                        <h1 class="job-title">{{ job.title }}</h1>
+                        <p class="company-name">{{ job.company.company_name|default:job.company.nickname }}</p>
+                        <div class="job-meta">
+                            <span class="meta-item">
+                                <i>📍</i> {{ job.location|default:"Localização não especificada" }}
+                            </span>
+                            {% if job.remote_work %}
+                            <span class="meta-item remote">
+                                <i>🌐</i> Trabalho Remoto
+                            </span>
+                            {% endif %}
+                            <span class="meta-item">
+                                <i>🗂️</i> {{ job.category.name }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="job-actions">
+                    <div class="job-status">
+                        <div class="status-badge {% if job.priority == 'urgent' %}urgent{% elif job.priority == 'featured' %}featured{% else %}normal{% endif %}">
+                            {% if job.priority == 'urgent' %}🔥 Urgente
+                            {% elif job.priority == 'featured' %}⭐ Destaque
+                            {% else %}✅ Disponível{% endif %}
+                        </div>
+                        <div class="spots-info">
+                            {{ job.spots_remaining }} vaga{{ job.spots_remaining|pluralize }} restante{{ job.spots_remaining|pluralize }}
+                        </div>
+                    </div>
+                    
+                    {% if can_apply %}
+                    <a href="{% url 'core:apply_job' job.id %}" class="btn btn-primary btn-large apply-btn">
+                        <span>📋</span> Candidatar-se
+                    </a>
+                    {% elif user_application %}
+                    <div class="application-status">
+                        <span class="status-indicator applied">✅</span>
+                        <div class="status-text">
+                            <strong>Candidatura Enviada</strong>
+                            <small>{{ user_application.applied_at|date:"d/m/Y" }}</small>
+                        </div>
+                    </div>
+                    {% elif not user.is_student %}
+                    <div class="info-message">
+                        <span>ℹ️</span> Apenas estudantes podem se candidatar
+                    </div>
+                    {% elif job.is_deadline_passed %}
+                    <div class="deadline-passed">
+                        <span>⏰</span> Prazo encerrado
+                    </div>
+                    {% endif %}
+                    
+                    {% if job.company == user %}
+                    <div class="owner-actions">
+                        <a href="{% url 'core:job_applications' job.id %}" class="btn btn-secondary">
+                            Ver Candidaturas ({{ job.applications.count }})
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Conteúdo Principal -->
+        <div class="job-content">
+            <div class="job-main">
+                <!-- Descrição -->
+                <section class="content-section">
+                    <h2>Sobre a Vaga</h2>
+                    <div class="content-text">
+                        {{ job.description|linebreaks }}
+                    </div>
+                </section>
+
+                <!-- Responsabilidades -->
+                {% if job.responsibilities %}
+                <section class="content-section">
+                    <h2>Responsabilidades</h2>
+                    <div class="content-text">
+                        {{ job.responsibilities|linebreaks }}
+                    </div>
+                </section>
+                {% endif %}
+
+                <!-- Requisitos -->
+                {% if job.requirements %}
+                <section class="content-section">
+                    <h2>Requisitos</h2>
+                    <div class="content-text">
+                        {{ job.requirements|linebreaks }}
+                    </div>
+                </section>
+                {% endif %}
+
+                <!-- Tags/Tecnologias -->
+                {% if job.get_tags_list %}
+                <section class="content-section">
+                    <h2>Tecnologias e Habilidades</h2>
+                    <div class="tags-container">
+                        {% for tag in job.get_tags_list %}
+                        <span class="tech-tag">{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                </section>
+                {% endif %}
+            </div>
+
+            <!-- Sidebar -->
+            <div class="job-sidebar">
+                <!-- Informações da Empresa -->
+                <div class="sidebar-card">
+                    <h3>Sobre a Empresa</h3>
+                    <div class="company-profile">
+                        <div class="company-avatar">
+                            {% if job.company.profile_picture %}
+                            <img src="{{ job.company.profile_picture.url }}" alt="{{ job.company.company_name|default:job.company.nickname }}">
+                            {% else %}
+                            <div class="avatar-placeholder">{{ job.company.company_name.0|default:job.company.nickname.0|upper }}</div>
+                            {% endif %}
+                        </div>
+                        <div class="company-info-text">
+                            <h4>{{ job.company.company_name|default:job.company.nickname }}</h4>
+                            {% if job.company.company_description %}
+                            <p>{{ job.company.company_description|truncatewords:20 }}</p>
+                            {% endif %}
+                            {% if job.company.company_website %}
+                            <a href="{{ job.company.company_website }}" target="_blank" class="company-website">
+                                🌐 Ver site
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detalhes da Vaga -->
+                <div class="sidebar-card">
+                    <h3>Detalhes</h3>
+                    <div class="job-details">
+                        {% if job.salary_min and job.salary_max %}
+                        <div class="detail-item">
+                            <span class="detail-label">💰 Remuneração</span>
+                            <span class="detail-value">R$ {{ job.salary_min|floatformat:0 }} - {{ job.salary_max|floatformat:0 }}/mês</span>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="detail-item">
+                            <span class="detail-label">📅 Publicada em</span>
+                            <span class="detail-value">{{ job.created_at|date:"d/m/Y" }}</span>
+                        </div>
+                        
+                        {% if job.deadline %}
+                        <div class="detail-item">
+                            <span class="detail-label">⏰ Prazo</span>
+                            <span class="detail-value">{{ job.deadline|date:"d/m/Y H:i" }}</span>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="detail-item">
+                            <span class="detail-label">👥 Candidatos</span>
+                            <span class="detail-value">{{ job.applications.count }} candidatura{{ job.applications.count|pluralize }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CTA -->
+                {% if can_apply %}
+                <div class="sidebar-card cta-card">
+                    <h3>Interessado?</h3>
+                    <p>Candidate-se agora e faça parte desta oportunidade!</p>
+                    <a href="{% url 'core:apply_job' job.id %}" class="btn btn-primary btn-full">
+                        Candidatar-se Agora
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.job-detail-page {
+    padding: 40px 0 80px;
+    min-height: 100vh;
+}
+
+.job-header {
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px;
+    margin-bottom: 40px;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.job-header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 30px;
+}
+
+.company-info {
+    display: flex;
+    gap: 20px;
+    flex: 1;
+}
+
+.company-logo {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: white;
+    flex-shrink: 0;
+}
+
+.gradient-bg-1 { background: linear-gradient(45deg, #667eea, #764ba2); }
+.gradient-bg-2 { background: linear-gradient(45deg, #f093fb, #f5576c); }
+.gradient-bg-3 { background: linear-gradient(45deg, #4facfe, #00f2fe); }
+.gradient-bg-4 { background: linear-gradient(45deg, #43e97b, #38f9d7); }
+.gradient-bg-5 { background: linear-gradient(45deg, #fa709a, #fee140); }
+
+.company-details {
+    flex: 1;
+}
+
+.job-title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+    line-height: 1.2;
+}
+
+.company-name {
+    font-size: 1.3rem;
+    color: var(--primary);
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.job-meta {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.meta-item.remote {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.job-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 20px;
+}
+
+.job-status {
+    text-align: right;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.status-badge.urgent {
+    background: linear-gradient(45deg, #ef4444, #dc2626);
+    color: white;
+}
+
+.status-badge.featured {
+    background: linear-gradient(45deg, var(--primary), var(--primary-light));
+    color: white;
+}
+
+.status-badge.normal {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-secondary);
+}
+
+.spots-info {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.apply-btn {
+    padding: 16px 32px;
+    font-size: 1.1rem;
+    border-radius: 25px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: nowrap;
+}
+
+.application-status {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 24px;
+    background: rgba(34, 197, 94, 0.1);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    border-radius: 16px;
+    color: #22c55e;
+}
+
+.status-indicator {
+    font-size: 1.2rem;
+}
+
+.status-text strong {
+    display: block;
+    font-weight: 600;
+}
+
+.status-text small {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+.info-message, .deadline-passed {
+    padding: 12px 20px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.owner-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.job-content {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 40px;
+    animation: fadeInUp 0.6s ease-out 0.2s both;
+}
+
+.content-section {
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 30px;
+}
+
+.content-section h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.content-text {
+    color: var(--text-secondary);
+    line-height: 1.7;
+    font-size: 1rem;
+}
+
+.tags-container {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.tech-tag {
+    padding: 8px 16px;
+    background: linear-gradient(45deg, var(--primary), var(--primary-light));
+    color: white;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.job-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.sidebar-card {
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 25px;
+}
+
+.sidebar-card h3 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+}
+
+.company-profile {
+    display: flex;
+    gap: 15px;
+}
+
+.company-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.company-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    background: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 1.2rem;
+}
+
+.company-info-text h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.company-info-text p {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 12px;
+}
+
+.company-website {
+    color: var(--primary);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.company-website:hover {
+    text-decoration: underline;
+}
+
+.job-details {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.detail-item:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.detail-value {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.cta-card {
+    background: linear-gradient(135deg, rgba(225, 48, 108, 0.1), rgba(131, 58, 180, 0.1));
+    border-color: rgba(225, 48, 108, 0.3);
+    text-align: center;
+}
+
+.cta-card p {
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.btn-full {
+    width: 100%;
+    justify-content: center;
+}
+
+/* Responsividade */
+@media (max-width: 1024px) {
+    .job-content {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+}
+
+@media (max-width: 768px) {
+    .job-header {
+        padding: 25px;
+    }
+    
+    .job-header-content {
+        flex-direction: column;
+        gap: 25px;
+    }
+    
+    .company-info {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    
+    .job-title {
+        font-size: 2rem;
+    }
+    
+    .job-actions {
+        align-items: center;
+        width: 100%;
+    }
+    
+    .apply-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .job-meta {
+        justify-content: center;
+    }
+    
+    .content-section {
+        padding: 20px;
+    }
+    
+    .sidebar-card {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .job-detail-page {
+        padding: 20px 0 60px;
+    }
+    
+    .job-title {
+        font-size: 1.6rem;
+    }
+    
+    .company-name {
+        font-size: 1.1rem;
+    }
+    
+    .content-section h2 {
+        font-size: 1.3rem;
+    }
+}
+</style>
+{% endblock %}

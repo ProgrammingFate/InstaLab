@@ -1,0 +1,193 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Cadastro - InstaLab{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <h2>Junte-se ao InstaLab</h2>
+    <p style="text-align: center; color: var(--text-secondary); margin-bottom: 30px;">
+        Crie sua conta e comece a se conectar com estudantes e empresas juniores de todo o país.
+    </p>
+    
+    <form method="POST" id="registerForm">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+            <div class="flash error" style="margin-bottom: 20px;">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+        
+        <!-- Informações Básicas -->
+        <div class="form-section">
+            <h3>Informações Básicas</h3>
+            
+            <div class="form-group">
+                {{ form.username.label_tag }}
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <div class="error-message">{{ form.username.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                {{ form.email.label_tag }}
+                {{ form.email }}
+                {% if form.email.errors %}
+                    <div class="error-message">{{ form.email.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                {{ form.password1.label_tag }}
+                {{ form.password1 }}
+                {% if form.password1.errors %}
+                    <div class="error-message">{{ form.password1.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                {{ form.password2.label_tag }}
+                {{ form.password2 }}
+                {% if form.password2.errors %}
+                    <div class="error-message">{{ form.password2.errors }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Tipo de Usuário -->
+        <div class="form-section">
+            <h3>Tipo de Conta</h3>
+            
+            <div class="form-group">
+                {{ form.user_type.label_tag }}
+                {{ form.user_type }}
+                {% if form.user_type.errors %}
+                    <div class="error-message">{{ form.user_type.errors }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Campos para Empresa (ocultos inicialmente) -->
+        <div class="form-section" id="companyFields" style="display: none;">
+            <h3>Informações da Empresa/Organização</h3>
+            
+            <div class="form-group">
+                {{ form.company_name.label_tag }}
+                {{ form.company_name }}
+                {% if form.company_name.errors %}
+                    <div class="error-message">{{ form.company_name.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                {{ form.company_description.label_tag }}
+                {{ form.company_description }}
+                {% if form.company_description.errors %}
+                    <div class="error-message">{{ form.company_description.errors }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Campos para Estudante (ocultos inicialmente) -->
+        <div class="form-section" id="studentFields" style="display: none;">
+            <h3>Informações Acadêmicas</h3>
+            
+            <div class="form-group">
+                {{ form.course.label_tag }}
+                {{ form.course }}
+                {% if form.course.errors %}
+                    <div class="error-message">{{ form.course.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                {{ form.university.label_tag }}
+                {{ form.university }}
+                {% if form.university.errors %}
+                    <div class="error-message">{{ form.university.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                {{ form.semester.label_tag }}
+                {{ form.semester }}
+                {% if form.semester.errors %}
+                    <div class="error-message">{{ form.semester.errors }}</div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-bottom: 20px;">
+            Criar Conta
+        </button>
+    </form>
+    
+    <div style="text-align: center; padding-top: 20px; border-top: 1px solid var(--border);">
+        <p style="color: var(--text-secondary); margin-bottom: 15px;">
+            Já tem uma conta?
+        </p>
+        <a href="{% url 'accounts:login' %}" class="btn btn-outline" style="width: 100%;">
+            Fazer Login
+        </a>
+    </div>
+</div>
+
+<style>
+.form-section {
+    margin-bottom: 30px;
+    padding: 25px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    border-radius: 15px;
+}
+
+.form-section h3 {
+    color: var(--text-primary);
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+}
+
+.form-section:first-child {
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+.form-section:first-child h3 {
+    display: none;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const userTypeSelect = document.getElementById('id_user_type');
+    const companyFields = document.getElementById('companyFields');
+    const studentFields = document.getElementById('studentFields');
+    
+    function toggleFields() {
+        const userType = userTypeSelect.value;
+        
+        if (userType === 'company') {
+            companyFields.style.display = 'block';
+            studentFields.style.display = 'none';
+        } else if (userType === 'student') {
+            studentFields.style.display = 'block';
+            companyFields.style.display = 'none';
+        } else {
+            companyFields.style.display = 'none';
+            studentFields.style.display = 'none';
+        }
+    }
+    
+    // Toggle inicial
+    toggleFields();
+    
+    // Toggle quando mudar
+    userTypeSelect.addEventListener('change', toggleFields);
+});
+</script>
+{% endblock %}
