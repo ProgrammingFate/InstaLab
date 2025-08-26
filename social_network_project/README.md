@@ -1,88 +1,164 @@
 # InstaLab
 
-Plataforma social para estudantes, empresas juniores, laboratórios e entusiastas de tecnologia, design, robótica, fotografia e inovação. Objetivo: centralizar projetos, conectar talentos e facilitar colaboração e troca de mensagens em tempo real.
+Plataforma de vagas e estágios para estudantes, empresas e laboratórios de tecnologia, design, robótica, fotografia e inovação. Conecta talentos acadêmicos com oportunidades profissionais de forma simples e eficiente.
 
-## ✨ Funcionalidades (MVP)
+## ✨ Funcionalidades Principais
 
-- Cadastro e login (usuário + nickname único + email + senha / confirmar senha)
-- Perfil com foto (upload), nickname e bio
-- Feed simples de posts (texto / futura imagem)
-- Upload de imagens de perfil
-- Mensagens em tempo real (WebSocket) via Django Channels (estrutura inicial)
-- Pesquisa básica de posts
-- Interface minimalista com as cores principais: `#6A5ACD` (Slate Purple) e `#000000`
+- **Sistema de Usuários Diferenciados**: Cadastro como Estudante ou Empresa
+- **Gestão de Vagas**: Empresas podem criar, editar e gerenciar suas vagas
+- **Aplicação a Vagas**: Estudantes podem se candidatar às oportunidades
+- **Perfis Completos**: Upload de foto, bio e informações da empresa/estudante
+- **Categorização**: Vagas organizadas por categorias (Tecnologia, Design, etc.)
+- **Busca e Filtros**: Sistema de pesquisa por título, categoria e localização
+- **Dashboard Personalizado**: Visualização das candidaturas e vagas criadas
+- **Interface Moderna**: Design inspirado no Instagram com glassmorphism
+
+## 🎯 Tipos de Usuário
+
+- **Estudantes**: Podem navegar, pesquisar e se candidatar a vagas
+- **Empresas**: Podem criar vagas, gerenciar candidaturas e visualizar perfis dos candidatos
 
 ## 🗺️ Roadmap (Próximas Etapas)
 
-1. Comentários em posts
-2. Curtidas / Reações
-3. Seguir / Conectar perfis
-4. Caixa de entrada (threads de chat) persistente
-5. Upload de imagens em posts (galeria) + corte (Pillow)
-6. Notificações em tempo real
-7. API (Django REST Framework) para apps móveis
-8. Deploy (Docker + Gunicorn + Nginx)
+1. Sistema de mensagens entre empresas e candidatos
+2. Notificações em tempo real
+3. Upload de currículos (PDF)
+4. Sistema de avaliação de candidatos
+5. Relatórios e analytics para empresas
+6. API REST para aplicações móveis
+7. Sistema de recomendações
+8. Deploy em produção
 
-## 🛠️ Stack
+## 🛠️ Stack Tecnológica
 
-- Django 4
-- Django Channels 4
-- Redis (canal de mensagens para produção)
-- PostgreSQL (planejado; SQLite em dev inicial)
-- Pillow (imagens)
-- Crispy Forms (melhor UX de formulários)
-- Docker / docker-compose
+- **Backend**: Django 4.2.9
+- **Banco de Dados**: SQLite (desenvolvimento) / PostgreSQL (produção)
+- **Upload de Arquivos**: Pillow para processamento de imagens
+- **Frontend**: HTML5, CSS3 com Glassmorphism, JavaScript
+- **Autenticação**: Sistema customizado com tipos de usuário
+- **Deploy**: Docker / docker-compose (configurado)
 
-## 📂 Estrutura Simplificada
+## 📂 Estrutura do Projeto
 
 ```
 apps/
-  accounts/ (usuários, perfis)
-  core/ (posts, feed, pesquisa)
-  messaging/ (WebSockets, chat)
-config/ (settings, asgi/wsgi)
-static/ (css, js, img)
-media/ (uploads: profiles, posts)
+  accounts/ (autenticação, perfis de usuário)
+  core/ (vagas, candidaturas, dashboard)
+  messaging/ (sistema de mensagens - futuro)
+config/ (configurações Django)
+static/ (CSS, JS, imagens, favicon)
+media/ (uploads de perfis)
+templates/ (templates HTML)
 ```
 
-## 🚀 Execução com Docker
+## 🚀 Como Executar
+
+### Desenvolvimento Local
+
+```bash
+# Clone o repositório
+git clone https://github.com/ProgrammingFate/InstaLab.git
+cd InstaLab/social_network_project
+
+# Instale as dependências
+pip install -r requirements.txt
+
+# Execute as migrações
+python manage.py migrate
+
+# Crie dados de teste (opcional)
+python create_test_users.py
+python populate_jobs.py
+
+# Execute o servidor
+python manage.py runserver 8001
+```
+
+### Com Docker
 
 ```bash
 docker compose up --build
 ```
 
-Acesse: http://localhost:8000
+Acesse: http://localhost:8001
 
-Criar superusuário:
+## 👤 Usuários de Teste
 
+- **Estudante**: `joao_estudante` / senha: `senha123`
+- **Empresa**: `techjr` / senha: `senha123`
+
+## 🎨 Design System
+
+- **Cor Principal**: `#6A5ACD` (Slate Purple)
+- **Cores Secundárias**: Gradientes e glassmorphism
+- **Tipografia**: Roboto, sans-serif
+- **Estilo**: Moderno, limpo, inspirado em redes sociais
+
+## 🔧 Comandos Úteis
+
+### Migrações
+```bash
+python manage.py makemigrations
+python manage.py migrate
+```
+
+### Criar Superusuário
+```bash
+python manage.py createsuperuser
+```
+
+### Executar Testes
+```bash
+python manage.py test
+```
+
+### Com Docker
 ```bash
 docker compose run --rm web python manage.py createsuperuser
-```
-
-## 🔧 Migrações
-
-```bash
-docker compose run --rm web python manage.py makemigrations
-docker compose run --rm web python manage.py migrate
-```
-
-## 🧪 Testes
-
-```bash
 docker compose run --rm web python manage.py test
 ```
 
-## 📄 Variáveis de Ambiente (.env sugerido)
+## � Funcionalidades Implementadas
 
-```
-DEBUG=1
-SECRET_KEY=alterar_em_producao
-ALLOWED_HOSTS=localhost,127.0.0.1
-POSTGRES_DB=social_network
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=yourpassword
-REDIS_URL=redis://redis:6379/0
-```
+- ✅ Sistema de autenticação diferenciado (Estudante/Empresa)
+- ✅ CRUD completo de vagas
+- ✅ Sistema de candidaturas
+- ✅ Upload de fotos de perfil
+- ✅ Busca e filtros por categoria/localização
+- ✅ Dashboard para empresas e estudantes
+- ✅ Interface responsiva com design moderno
+- ✅ Paginação de resultados
+- ✅ Gestão de status de candidaturas
+
+## 🎯 Casos de Uso
+
+1. **Para Estudantes**:
+   - Cadastro com informações acadêmicas
+   - Navegação e busca de vagas
+   - Candidatura a oportunidades
+   - Acompanhamento de candidaturas
+
+2. **Para Empresas**:
+   - Cadastro com informações corporativas
+   - Criação e gestão de vagas
+   - Visualização de candidatos
+   - Gestão de candidaturas recebidas
+
+## 🤝 Contribuindo
+
+1. Faça um fork do projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/nova-feature`)
+3. Commit suas mudanças (`git commit -m 'Adiciona nova feature'`)
+4. Push para a branch (`git push origin feature/nova-feature`)
+5. Abra um Pull Request
+
+## 🛡️ Licença
+
+Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+---
+
+**InstaLab** - Conectando talentos acadêmicos com oportunidades profissionais 🚀
 
 ## 🎨 Estilo
 
