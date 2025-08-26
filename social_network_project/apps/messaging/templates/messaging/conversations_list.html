@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Conversas - InstaLab{% endblock %}
+
+{% block extra_css %}
+<style>
+    .chat-container {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        min-height: 70vh;
+    }
+    
+    .conversation-item {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        transition: all 0.3s ease;
+        margin-bottom: 10px;
+        padding: 15px;
+    }
+    
+    .conversation-item:hover {
+        background: rgba(106, 90, 205, 0.1);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(106, 90, 205, 0.3);
+    }
+    
+    .user-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, #6A5ACD, #9370DB);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 18px;
+    }
+    
+    .last-message {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 14px;
+    }
+    
+    .message-time {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 12px;
+    }
+    
+    .search-box {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 25px;
+        padding: 12px 20px;
+        color: white;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+    
+    .search-box::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .btn-new-chat {
+        background: linear-gradient(45deg, #6A5ACD, #9370DB);
+        border: none;
+        border-radius: 25px;
+        padding: 12px 25px;
+        color: white;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-new-chat:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(106, 90, 205, 0.4);
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="chat-container p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="text-white mb-0">💬 Suas Conversas</h2>
+                    <a href="{% url 'messaging:search_users' %}" class="btn btn-new-chat">
+                        ➕ Nova Conversa
+                    </a>
+                </div>
+                
+                {% if conversations %}
+                    {% for conversation in conversations %}
+                        {% with other_user=conversation.participants.all|first %}
+                            {% if other_user.id != user.id %}
+                                {% with other_user=other_user %}
+                            {% else %}
+                                {% with other_user=conversation.participants.all|last %}
+                            {% endif %}
+                            
+                            <a href="{% url 'messaging:chat_view' conversation.id %}" class="text-decoration-none">
+                                <div class="conversation-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="user-avatar me-3">
+                                            {% if other_user.profile_picture %}
+                                                <img src="{{ other_user.profile_picture.url }}" alt="{{ other_user.nickname }}" 
+                                                     style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">
+                                            {% else %}
+                                                {{ other_user.nickname|first|upper }}
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <h6 class="text-white mb-1">{{ other_user.nickname }}</h6>
+                                                    <div class="last-message">
+                                                        {% if conversation.last_message %}
+                                                            {% if conversation.last_message.sender == user %}
+                                                                Você: {{ conversation.last_message.content|truncatechars:50 }}
+                                                            {% else %}
+                                                                {{ conversation.last_message.content|truncatechars:50 }}
+                                                            {% endif %}
+                                                        {% else %}
+                                                            Conversa iniciada
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                                
+                                                <div class="message-time">
+                                                    {% if conversation.last_message %}
+                                                        {{ conversation.last_message.timestamp|date:"H:i" }}
+                                                    {% else %}
+                                                        {{ conversation.created_at|date:"H:i" }}
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                            
+                            {% endwith %}
+                        {% endwith %}
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-5">
+                        <div class="mb-4" style="font-size: 4rem;">💬</div>
+                        <h4 class="text-white mb-3">Nenhuma conversa ainda</h4>
+                        <p class="text-white-50 mb-4">
+                            Comece conversando com empresas ou estudantes!
+                        </p>
+                        <a href="{% url 'messaging:search_users' %}" class="btn btn-new-chat">
+                            Iniciar primeira conversa
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

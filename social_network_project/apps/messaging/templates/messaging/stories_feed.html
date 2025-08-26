@@ -1,0 +1,268 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Stories - InstaLab{% endblock %}
+
+{% block extra_css %}
+<style>
+    .stories-container {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 30px;
+    }
+    
+    .stories-scroll {
+        display: flex;
+        gap: 20px;
+        overflow-x: auto;
+        padding: 20px 0;
+        margin-bottom: 30px;
+    }
+    
+    .stories-scroll::-webkit-scrollbar {
+        height: 6px;
+    }
+    
+    .stories-scroll::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 3px;
+    }
+    
+    .stories-scroll::-webkit-scrollbar-thumb {
+        background: #6A5ACD;
+        border-radius: 3px;
+    }
+    
+    .story-item {
+        min-width: 120px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: inherit;
+    }
+    
+    .story-item:hover {
+        transform: translateY(-5px);
+        color: inherit;
+        text-decoration: none;
+    }
+    
+    .story-avatar {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        margin: 0 auto 10px;
+        position: relative;
+        background: linear-gradient(45deg, #6A5ACD, #9370DB);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 24px;
+    }
+    
+    .story-avatar.has-new {
+        background: linear-gradient(45deg, #FF6B6B, #FF8E53);
+        animation: pulse 2s infinite;
+    }
+    
+    .story-avatar.viewed {
+        background: rgba(255, 255, 255, 0.3);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    @keyframes pulse {
+        0% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0.7); }
+        70% { box-shadow: 0 0 0 15px rgba(255, 107, 107, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(255, 107, 107, 0); }
+    }
+    
+    .story-count {
+        position: absolute;
+        top: -5px;
+        right: -5px;
+        background: #FF6B6B;
+        color: white;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        font-size: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+    }
+    
+    .story-name {
+        color: white;
+        font-size: 14px;
+        margin-top: 8px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+    
+    .create-story-btn {
+        background: linear-gradient(45deg, #6A5ACD, #9370DB);
+        border: none;
+        border-radius: 25px;
+        padding: 15px 30px;
+        color: white;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .create-story-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(106, 90, 205, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .section-title {
+        color: white;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: between;
+        gap: 15px;
+    }
+    
+    .empty-stories {
+        text-align: center;
+        padding: 60px 20px;
+    }
+    
+    .story-type-icon {
+        position: absolute;
+        bottom: -5px;
+        right: -5px;
+        width: 24px;
+        height: 24px;
+        background: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-10 mx-auto">
+            <div class="stories-container">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="text-white mb-0">📱 Stories</h2>
+                    
+                    {% if user.user_type == 'company' %}
+                        <a href="{% url 'messaging:create_story' %}" class="create-story-btn">
+                            ➕ Criar Story
+                        </a>
+                    {% endif %}
+                </div>
+                
+                {% if stories_by_user %}
+                    <div class="stories-scroll">
+                        {% for user_id, story_data in stories_by_user.items %}
+                            {% with story_user=story_data.user first_story=story_data.stories.0 unviewed=story_data.unviewed_count %}
+                                <a href="{% url 'messaging:view_story' first_story.id %}" class="story-item">
+                                    <div class="story-avatar {% if unviewed > 0 %}has-new{% else %}viewed{% endif %}">
+                                        {% if story_user.profile_picture %}
+                                            <img src="{{ story_user.profile_picture.url }}" alt="{{ story_user.nickname }}" 
+                                                 style="width: 76px; height: 76px; border-radius: 50%; object-fit: cover;">
+                                        {% else %}
+                                            {{ story_user.nickname|first|upper }}
+                                        {% endif %}
+                                        
+                                        {% if unviewed > 0 %}
+                                            <div class="story-count">{{ unviewed }}</div>
+                                        {% endif %}
+                                        
+                                        <!-- Ícone do tipo de story -->
+                                        <div class="story-type-icon">
+                                            {% if first_story.story_type == 'job' %}
+                                                💼
+                                            {% elif first_story.story_type == 'project' %}
+                                                🚀
+                                            {% elif first_story.story_type == 'identity' %}
+                                                🎨
+                                            {% elif first_story.story_type == 'achievement' %}
+                                                🏆
+                                            {% else %}
+                                                📢
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="story-name">{{ story_user.nickname }}</div>
+                                </a>
+                            {% endwith %}
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h4 class="text-white mb-3">💡 Últimos Updates</h4>
+                        <div class="row">
+                            {% for user_id, story_data in stories_by_user.items %}
+                                {% for story in story_data.stories|slice:":3" %}
+                                    <div class="col-md-4 mb-3">
+                                        <a href="{% url 'messaging:view_story' story.id %}" class="text-decoration-none">
+                                            <div class="card bg-transparent border-light">
+                                                {% if story.image %}
+                                                    <img src="{{ story.image.url }}" class="card-img-top" style="height: 200px; object-fit: cover; border-radius: 15px;">
+                                                {% endif %}
+                                                <div class="card-body">
+                                                    <h6 class="card-title text-white">
+                                                        {% if story.story_type == 'job' %}💼{% elif story.story_type == 'project' %}🚀{% elif story.story_type == 'identity' %}🎨{% elif story.story_type == 'achievement' %}🏆{% else %}📢{% endif %}
+                                                        {{ story.title }}
+                                                    </h6>
+                                                    <p class="card-text text-white-50 small">{{ story.content|truncatechars:80 }}</p>
+                                                    <small class="text-white-50">{{ story.user.nickname }} • {{ story.created_at|timesince }} atrás</small>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                {% endfor %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="empty-stories">
+                        <div class="mb-4" style="font-size: 5rem;">📱</div>
+                        <h3 class="text-white mb-3">Nenhum story ainda</h3>
+                        <p class="text-white-50 mb-4">
+                            {% if user.user_type == 'company' %}
+                                Seja a primeira empresa a compartilhar novidades!
+                            {% else %}
+                                As empresas ainda não postaram stories.
+                            {% endif %}
+                        </p>
+                        
+                        {% if user.user_type == 'company' %}
+                            <a href="{% url 'messaging:create_story' %}" class="create-story-btn">
+                                Criar primeiro story
+                            </a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+                
+                <div class="mt-5 text-center">
+                    <a href="{% url 'messaging:conversations_list' %}" class="btn btn-outline-light">
+                        💬 Ir para Conversas
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

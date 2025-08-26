@@ -1,0 +1,339 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Criar Story - InstaLab{% endblock %}
+
+{% block extra_css %}
+<style>
+    .create-story-container {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 40px;
+    }
+    
+    .form-control, .form-select {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 15px;
+        color: white;
+        padding: 15px 20px;
+    }
+    
+    .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .form-control:focus, .form-select:focus {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: #6A5ACD;
+        box-shadow: 0 0 0 3px rgba(106, 90, 205, 0.3);
+        color: white;
+    }
+    
+    .form-select option {
+        background: #2c2c2c;
+        color: white;
+    }
+    
+    .form-label {
+        color: white;
+        font-weight: 500;
+        margin-bottom: 10px;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(45deg, #6A5ACD, #9370DB);
+        border: none;
+        border-radius: 25px;
+        padding: 15px 40px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(106, 90, 205, 0.4);
+    }
+    
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 25px;
+        padding: 15px 30px;
+        color: white;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .story-type-preview {
+        display: flex;
+        gap: 15px;
+        margin-top: 10px;
+        flex-wrap: wrap;
+    }
+    
+    .type-option {
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px solid transparent;
+        border-radius: 15px;
+        padding: 15px 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        min-width: 120px;
+    }
+    
+    .type-option:hover {
+        background: rgba(106, 90, 205, 0.2);
+        border-color: #6A5ACD;
+    }
+    
+    .type-option.selected {
+        background: rgba(106, 90, 205, 0.3);
+        border-color: #6A5ACD;
+    }
+    
+    .type-icon {
+        font-size: 24px;
+        margin-bottom: 8px;
+    }
+    
+    .type-name {
+        color: white;
+        font-size: 12px;
+        font-weight: 500;
+    }
+    
+    .image-preview {
+        max-width: 100%;
+        max-height: 300px;
+        border-radius: 15px;
+        margin-top: 15px;
+        display: none;
+    }
+    
+    .file-upload-wrapper {
+        position: relative;
+        overflow: hidden;
+        display: inline-block;
+        width: 100%;
+    }
+    
+    .file-upload-wrapper input[type=file] {
+        position: absolute;
+        left: -9999px;
+    }
+    
+    .file-upload-label {
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px dashed rgba(255, 255, 255, 0.3);
+        border-radius: 15px;
+        padding: 30px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: block;
+        color: white;
+    }
+    
+    .file-upload-label:hover {
+        background: rgba(106, 90, 205, 0.1);
+        border-color: #6A5ACD;
+    }
+    
+    .preview-section {
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 15px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="create-story-container">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="text-white mb-0">✨ Criar Novo Story</h2>
+                    <a href="{% url 'messaging:stories_feed' %}" class="btn btn-secondary">
+                        ← Voltar
+                    </a>
+                </div>
+                
+                <form method="post" enctype="multipart/form-data" id="story-form">
+                    {% csrf_token %}
+                    
+                    <div class="mb-4">
+                        <label class="form-label">📝 Tipo do Story</label>
+                        <div class="story-type-preview">
+                            <div class="type-option" data-value="job">
+                                <div class="type-icon">💼</div>
+                                <div class="type-name">Nova Vaga</div>
+                            </div>
+                            <div class="type-option" data-value="project">
+                                <div class="type-icon">🚀</div>
+                                <div class="type-name">Projeto</div>
+                            </div>
+                            <div class="type-option" data-value="identity">
+                                <div class="type-icon">🎨</div>
+                                <div class="type-name">Identidade</div>
+                            </div>
+                            <div class="type-option" data-value="achievement">
+                                <div class="type-icon">🏆</div>
+                                <div class="type-name">Conquista</div>
+                            </div>
+                            <div class="type-option" data-value="announcement">
+                                <div class="type-icon">📢</div>
+                                <div class="type-name">Anúncio</div>
+                            </div>
+                        </div>
+                        {{ form.story_type }}
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="{{ form.title.id_for_label }}" class="form-label">{{ form.title.label }}</label>
+                        {{ form.title }}
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label for="{{ form.content.id_for_label }}" class="form-label">{{ form.content.label }}</label>
+                        {{ form.content }}
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label">🖼️ Imagem (Opcional)</label>
+                        <div class="file-upload-wrapper">
+                            {{ form.image }}
+                            <label for="{{ form.image.id_for_label }}" class="file-upload-label">
+                                <div style="font-size: 48px; margin-bottom: 15px;">📸</div>
+                                <div>Clique para adicionar uma imagem</div>
+                                <small style="color: rgba(255,255,255,0.7);">PNG, JPG ou GIF</small>
+                            </label>
+                        </div>
+                        <img id="image-preview" class="image-preview" alt="Preview">
+                    </div>
+                    
+                    <div class="preview-section" id="story-preview" style="display: none;">
+                        <h5 class="text-white mb-3">👀 Preview do Story</h5>
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="user-avatar me-3" style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(45deg, #6A5ACD, #9370DB); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                                {% if user.profile_picture %}
+                                    <img src="{{ user.profile_picture.url }}" alt="{{ user.nickname }}" 
+                                         style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">
+                                {% else %}
+                                    {{ user.nickname|first|upper }}
+                                {% endif %}
+                            </div>
+                            <div>
+                                <h6 class="text-white mb-0">{{ user.nickname }}</h6>
+                                <small class="text-white-50">{{ user.company_name|default:"Empresa" }}</small>
+                            </div>
+                        </div>
+                        <div id="preview-content"></div>
+                    </div>
+                    
+                    <div class="d-flex gap-3 mt-4">
+                        <button type="submit" class="btn btn-primary flex-grow-1">
+                            ✨ Publicar Story
+                        </button>
+                        <a href="{% url 'messaging:stories_feed' %}" class="btn btn-secondary">
+                            Cancelar
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const typeOptions = document.querySelectorAll('.type-option');
+    const storyTypeInput = document.querySelector('select[name="story_type"]');
+    const titleInput = document.querySelector('input[name="title"]');
+    const contentInput = document.querySelector('textarea[name="content"]');
+    const imageInput = document.querySelector('input[name="image"]');
+    const imagePreview = document.getElementById('image-preview');
+    const storyPreview = document.getElementById('story-preview');
+    const previewContent = document.getElementById('preview-content');
+    
+    // Hide the actual select
+    storyTypeInput.style.display = 'none';
+    
+    // Type selection
+    typeOptions.forEach(option => {
+        option.addEventListener('click', function() {
+            typeOptions.forEach(opt => opt.classList.remove('selected'));
+            this.classList.add('selected');
+            storyTypeInput.value = this.dataset.value;
+            updatePreview();
+        });
+    });
+    
+    // Image preview
+    imageInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagePreview.src = e.target.result;
+                imagePreview.style.display = 'block';
+                updatePreview();
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+    
+    // Update preview
+    function updatePreview() {
+        const title = titleInput.value;
+        const content = contentInput.value;
+        const selectedType = document.querySelector('.type-option.selected');
+        
+        if (title || content || selectedType) {
+            storyPreview.style.display = 'block';
+            
+            let previewHtml = '';
+            if (selectedType) {
+                const icon = selectedType.querySelector('.type-icon').textContent;
+                const typeName = selectedType.querySelector('.type-name').textContent;
+                previewHtml += `<div class="mb-2"><span style="font-size: 20px;">${icon}</span> <strong class="text-white">${typeName}</strong></div>`;
+            }
+            
+            if (title) {
+                previewHtml += `<h5 class="text-white mb-2">${title}</h5>`;
+            }
+            
+            if (content) {
+                previewHtml += `<p class="text-white-50">${content}</p>`;
+            }
+            
+            if (imagePreview.style.display === 'block') {
+                previewHtml += `<img src="${imagePreview.src}" style="max-width: 100%; border-radius: 10px; margin-top: 10px;">`;
+            }
+            
+            previewContent.innerHTML = previewHtml;
+        } else {
+            storyPreview.style.display = 'none';
+        }
+    }
+    
+    // Real-time preview updates
+    titleInput.addEventListener('input', updatePreview);
+    contentInput.addEventListener('input', updatePreview);
+    
+    // Set default type
+    typeOptions[0].click();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,404 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ story.title }} - {{ story.user.nickname }} - InstaLab{% endblock %}
+
+{% block extra_css %}
+<style>
+    .story-viewer {
+        background: linear-gradient(135deg, rgba(0,0,0,0.9), rgba(30,30,30,0.9));
+        min-height: 100vh;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .story-content {
+        position: relative;
+        z-index: 2;
+        max-width: 500px;
+        margin: 0 auto;
+        padding: 20px;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+    }
+    
+    .story-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+        background: rgba(0,0,0,0.5);
+        padding: 15px;
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+    }
+    
+    .story-progress {
+        display: flex;
+        gap: 5px;
+        margin-bottom: 15px;
+    }
+    
+    .progress-bar {
+        flex: 1;
+        height: 3px;
+        background: rgba(255,255,255,0.3);
+        border-radius: 2px;
+        overflow: hidden;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(45deg, #6A5ACD, #9370DB);
+        width: 0%;
+        animation: fillProgress 5s linear forwards;
+    }
+    
+    .progress-fill.active {
+        animation: fillProgress 5s linear forwards;
+    }
+    
+    .progress-fill.completed {
+        width: 100%;
+    }
+    
+    @keyframes fillProgress {
+        from { width: 0%; }
+        to { width: 100%; }
+    }
+    
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-grow: 1;
+    }
+    
+    .user-avatar {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, #6A5ACD, #9370DB);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 18px;
+    }
+    
+    .story-main {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding: 40px 20px;
+    }
+    
+    .story-image {
+        max-width: 100%;
+        max-height: 50vh;
+        border-radius: 20px;
+        margin-bottom: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    
+    .story-type {
+        background: rgba(106, 90, 205, 0.8);
+        padding: 8px 20px;
+        border-radius: 25px;
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 20px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .story-title {
+        font-size: 28px;
+        font-weight: bold;
+        color: white;
+        margin-bottom: 15px;
+        line-height: 1.2;
+    }
+    
+    .story-text {
+        font-size: 16px;
+        color: rgba(255,255,255,0.9);
+        line-height: 1.6;
+        max-width: 400px;
+    }
+    
+    .story-actions {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: rgba(0,0,0,0.5);
+        padding: 20px;
+        border-radius: 15px;
+        backdrop-filter: blur(10px);
+    }
+    
+    .story-time {
+        color: rgba(255,255,255,0.7);
+        font-size: 14px;
+    }
+    
+    .story-nav {
+        display: flex;
+        gap: 15px;
+    }
+    
+    .nav-btn {
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        font-size: 18px;
+    }
+    
+    .nav-btn:hover {
+        background: rgba(106, 90, 205, 0.5);
+        color: white;
+        transform: scale(1.1);
+    }
+    
+    .close-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        background: rgba(0,0,0,0.7);
+        border: none;
+        border-radius: 50%;
+        width: 45px;
+        height: 45px;
+        color: white;
+        font-size: 20px;
+        cursor: pointer;
+        z-index: 10;
+        transition: all 0.3s ease;
+    }
+    
+    .close-btn:hover {
+        background: rgba(0,0,0,0.9);
+        transform: scale(1.1);
+    }
+    
+    .story-background {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0.3;
+        z-index: 1;
+        filter: blur(10px);
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+    }
+    
+    .btn-action {
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 25px;
+        padding: 10px 20px;
+        color: white;
+        text-decoration: none;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-action:hover {
+        background: rgba(106, 90, 205, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .story-viewers {
+        margin-top: 15px;
+        color: rgba(255,255,255,0.7);
+        font-size: 12px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="story-viewer">
+    <!-- Background Image -->
+    {% if story.image %}
+        <img src="{{ story.image.url }}" alt="" class="story-background">
+    {% endif %}
+    
+    <!-- Close Button -->
+    <button class="close-btn" onclick="window.history.back()">×</button>
+    
+    <div class="story-content">
+        <!-- Progress Bars -->
+        <div class="story-progress">
+            {% for user_story in user_stories %}
+                <div class="progress-bar">
+                    <div class="progress-fill {% if user_story.id == story.id %}active{% elif user_story.id|add:0 < story.id|add:0 %}completed{% endif %}"></div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Header -->
+        <div class="story-header">
+            <div class="user-info">
+                <div class="user-avatar">
+                    {% if story.user.profile_picture %}
+                        <img src="{{ story.user.profile_picture.url }}" alt="{{ story.user.nickname }}" 
+                             style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">
+                    {% else %}
+                        {{ story.user.nickname|first|upper }}
+                    {% endif %}
+                </div>
+                
+                <div>
+                    <h6 class="text-white mb-0">{{ story.user.nickname }}</h6>
+                    <small class="text-white-50">{{ story.user.company_name|default:"Empresa" }}</small>
+                </div>
+            </div>
+            
+            <div class="story-time">
+                {{ story.created_at|timesince }} atrás
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="story-main">
+            <div class="story-type">
+                {% if story.story_type == 'job' %}
+                    💼 Nova Vaga
+                {% elif story.story_type == 'project' %}
+                    🚀 Novo Projeto
+                {% elif story.story_type == 'identity' %}
+                    🎨 Nova Identidade
+                {% elif story.story_type == 'achievement' %}
+                    🏆 Conquista
+                {% else %}
+                    📢 Anúncio
+                {% endif %}
+            </div>
+            
+            {% if story.image %}
+                <img src="{{ story.image.url }}" alt="{{ story.title }}" class="story-image">
+            {% endif %}
+            
+            <h2 class="story-title">{{ story.title }}</h2>
+            <p class="story-text">{{ story.content }}</p>
+            
+            {% if story.story_type == 'job' %}
+                <div class="action-buttons">
+                    <a href="{% url 'core:vagas_list' %}" class="btn-action">
+                        👀 Ver Vagas
+                    </a>
+                    <a href="{% url 'messaging:chat' %}?user_id={{ story.user.id }}" class="btn-action">
+                        💬 Conversar
+                    </a>
+                </div>
+            {% else %}
+                <div class="action-buttons">
+                    <a href="{% url 'messaging:chat' %}?user_id={{ story.user.id }}" class="btn-action">
+                        💬 Conversar
+                    </a>
+                    <a href="{% url 'accounts:profile' story.user.id %}" class="btn-action">
+                        👤 Ver Perfil
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Navigation -->
+        <div class="story-actions">
+            <div class="story-nav">
+                {% if current_index > 0 %}
+                    <a href="{% url 'messaging:view_story' user_stories|slice:':1'|first.id %}" class="nav-btn">
+                        ←
+                    </a>
+                {% endif %}
+                
+                {% if current_index < user_stories|length|add:'-1' %}
+                    {% with next_story=user_stories|slice:'1:'|first %}
+                        <a href="{% url 'messaging:view_story' next_story.id %}" class="nav-btn">
+                            →
+                        </a>
+                    {% endwith %}
+                {% endif %}
+            </div>
+            
+            <div>
+                {% if story.user == user %}
+                    <div class="story-viewers">
+                        👁️ {{ story.views.count }} visualizações
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto advance after 5 seconds
+    const currentIndex = {{ current_index }};
+    const totalStories = {{ user_stories|length }};
+    
+    {% if current_index < user_stories|length|add:'-1' %}
+        setTimeout(() => {
+            {% with next_story=user_stories|slice:'1:'|first %}
+                window.location.href = "{% url 'messaging:view_story' next_story.id %}";
+            {% endwith %}
+        }, 5000);
+    {% else %}
+        setTimeout(() => {
+            window.location.href = "{% url 'messaging:stories_feed' %}";
+        }, 5000);
+    {% endif %}
+    
+    // Pause on click/touch
+    let isPaused = false;
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.nav-btn') || e.target.closest('.close-btn') || e.target.closest('.btn-action')) {
+            return;
+        }
+        
+        isPaused = !isPaused;
+        const progressFill = document.querySelector('.progress-fill.active');
+        if (progressFill) {
+            progressFill.style.animationPlayState = isPaused ? 'paused' : 'running';
+        }
+    });
+    
+    // Keyboard navigation
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowLeft' && {{ current_index }} > 0) {
+            window.location.href = "{% url 'messaging:view_story' user_stories|slice:':1'|first.id %}";
+        } else if (e.key === 'ArrowRight' && {{ current_index }} < {{ user_stories|length|add:'-1' }}) {
+            {% with next_story=user_stories|slice:'1:'|first %}
+                window.location.href = "{% url 'messaging:view_story' next_story.id %}";
+            {% endwith %}
+        } else if (e.key === 'Escape') {
+            window.history.back();
+        }
+    });
+});
+</script>
+{% endblock %}

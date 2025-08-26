@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Buscar Usuários - InstaLab{% endblock %}
+
+{% block extra_css %}
+<style>
+    .search-container {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 30px;
+    }
+    
+    .search-box {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 25px;
+        padding: 15px 25px;
+        color: white;
+        width: 100%;
+        font-size: 16px;
+    }
+    
+    .search-box::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .search-box:focus {
+        outline: none;
+        border-color: #6A5ACD;
+        box-shadow: 0 0 0 3px rgba(106, 90, 205, 0.3);
+    }
+    
+    .user-item {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 20px;
+        margin-bottom: 15px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+    
+    .user-item:hover {
+        background: rgba(106, 90, 205, 0.1);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(106, 90, 205, 0.3);
+        color: inherit;
+        text-decoration: none;
+    }
+    
+    .user-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, #6A5ACD, #9370DB);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 24px;
+    }
+    
+    .user-type-badge {
+        padding: 4px 12px;
+        border-radius: 15px;
+        font-size: 12px;
+        font-weight: 500;
+    }
+    
+    .badge-student {
+        background: linear-gradient(45deg, #4CAF50, #45a049);
+        color: white;
+    }
+    
+    .badge-company {
+        background: linear-gradient(45deg, #FF9800, #e68900);
+        color: white;
+    }
+    
+    .btn-search {
+        background: linear-gradient(45deg, #6A5ACD, #9370DB);
+        border: none;
+        border-radius: 25px;
+        padding: 15px 30px;
+        color: white;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-search:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(106, 90, 205, 0.4);
+        color: white;
+    }
+    
+    .back-btn {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 15px;
+        padding: 12px 20px;
+        color: white;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .back-btn:hover {
+        background: rgba(106, 90, 205, 0.3);
+        color: white;
+        transform: translateX(-3px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="search-container">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="text-white mb-0">🔍 Buscar Usuários</h2>
+                    <a href="{% url 'messaging:conversations_list' %}" class="back-btn">
+                        ← Voltar
+                    </a>
+                </div>
+                
+                <form method="get" class="mb-4">
+                    <div class="d-flex gap-3">
+                        <input type="text" 
+                               name="q" 
+                               class="search-box" 
+                               placeholder="Digite o nome, nickname ou email..." 
+                               value="{{ query }}"
+                               autocomplete="off">
+                        <button type="submit" class="btn btn-search">
+                            Buscar
+                        </button>
+                    </div>
+                </form>
+                
+                {% if query %}
+                    <div class="mb-3">
+                        <small class="text-white-50">
+                            Resultados para: <strong>"{{ query }}"</strong>
+                        </small>
+                    </div>
+                {% endif %}
+                
+                {% if users %}
+                    {% for user in users %}
+                        <a href="{% url 'messaging:chat' %}?user_id={{ user.id }}" class="user-item">
+                            <div class="d-flex align-items-center">
+                                <div class="user-avatar me-3">
+                                    {% if user.profile_picture %}
+                                        <img src="{{ user.profile_picture.url }}" alt="{{ user.nickname }}" 
+                                             style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;">
+                                    {% else %}
+                                        {{ user.nickname|first|upper }}
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h5 class="text-white mb-1">{{ user.nickname }}</h5>
+                                            <p class="text-white-50 mb-2">{{ user.email }}</p>
+                                            
+                                            {% if user.user_type == 'company' %}
+                                                <span class="user-type-badge badge-company">
+                                                    🏢 {{ user.company_name|default:"Empresa" }}
+                                                </span>
+                                            {% else %}
+                                                <span class="user-type-badge badge-student">
+                                                    🎓 {{ user.course|default:"Estudante" }}
+                                                </span>
+                                            {% endif %}
+                                        </div>
+                                        
+                                        <div class="text-white-50">
+                                            💬 Conversar
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    {% endfor %}
+                {% elif query %}
+                    <div class="text-center py-5">
+                        <div class="mb-4" style="font-size: 4rem;">😔</div>
+                        <h4 class="text-white mb-3">Nenhum usuário encontrado</h4>
+                        <p class="text-white-50">
+                            Tente buscar por outro nome, nickname ou email.
+                        </p>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <div class="mb-4" style="font-size: 4rem;">👥</div>
+                        <h4 class="text-white mb-3">Encontre usuários</h4>
+                        <p class="text-white-50">
+                            Digite no campo acima para encontrar estudantes e empresas.
+                        </p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Focus no campo de busca
+    document.querySelector('.search-box').focus();
+    
+    // Auto-submit após parar de digitar
+    let searchTimeout;
+    document.querySelector('.search-box').addEventListener('input', function(e) {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            if (e.target.value.length >= 2) {
+                e.target.closest('form').submit();
+            }
+        }, 500);
+    });
+});
+</script>
+{% endblock %}
