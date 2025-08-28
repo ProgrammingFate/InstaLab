@@ -5,7 +5,7 @@ import django
 
 # Setup Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
-sys.path.append('/home/kali/Área de trabalho/InstaLab/social_network_project')
+sys.path.append('/app')  # Atualizado para Docker
 django.setup()
 
 from apps.accounts.models import CustomUser

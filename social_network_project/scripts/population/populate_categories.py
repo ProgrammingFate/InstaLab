@@ -8,7 +8,7 @@ import sys
 import django
 
 # Configurar Django
-sys.path.append('/home/lucas-dev/Desktop/instalab/InstaLab/social_network_project')
+sys.path.append('/app')  # Atualizado para Docker
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
 

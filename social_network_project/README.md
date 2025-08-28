@@ -44,8 +44,13 @@ Plataforma de vagas e estágios para estudantes, empresas e laboratórios de tec
 apps/
   accounts/ (autenticação, perfis de usuário)
   core/ (vagas, candidaturas, dashboard)
+    management/commands/ (comandos Django personalizados)
   messaging/ (sistema de mensagens - futuro)
 config/ (configurações Django)
+scripts/ (scripts utilitários organizados)
+  test_data/ (scripts para dados de teste)
+  management/ (scripts de gerenciamento)
+  population/ (scripts para popular BD)
 static/ (CSS, JS, imagens, favicon)
 media/ (uploads de perfis)
 templates/ (templates HTML)
@@ -67,8 +72,9 @@ pip install -r requirements.txt
 python manage.py migrate
 
 # Crie dados de teste (opcional)
-python create_test_users.py
-python populate_jobs.py
+python scripts/test_data/create_test_users.py
+python scripts/population/populate_categories.py
+python scripts/population/populate_jobs.py
 
 # Execute o servidor
 python manage.py runserver 8001
@@ -77,7 +83,16 @@ python manage.py runserver 8001
 ### Com Docker
 
 ```bash
+# Subir o ambiente
 docker compose up --build
+
+# Executar scripts (em outro terminal)
+sudo docker compose exec web python scripts/population/populate_categories.py
+sudo docker compose exec web python scripts/test_data/create_test_users.py
+sudo docker compose exec web python scripts/population/populate_jobs.py
+
+# Sistema de gerenciamento para empresas
+sudo docker compose exec web python scripts/management/manage_project_requests.py
 ```
 
 Acesse: http://localhost:8001
