@@ -1,387 +1,735 @@
-{% extends 'core/base.html' %}
-{% load static %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfil - {{ user.nickname }}</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #E1306C;
+            --primary-light: #F56040;
+            --primary-dark: #833AB4;
+            --secondary: #405DE6;
+            --accent: #FFDC80;
+            --bg-dark: #000000;
+            --bg-light: #1a1a1a;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B3B3B3;
+            --border: rgba(255, 255, 255, 0.1);
+            --glass: rgba(255, 255, 255, 0.1);
+            --shadow: rgba(0, 0, 0, 0.3);
+            --status-online: #3ba55d;
+            --status-offline: #747f8d;
+            --status-idle: #faa81a;
+            --status-dnd: #ed4245;
+        }
 
-{% block title %}Perfil - {{ user.nickname }}{% endblock %}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
 
-{% block extra_css %}
-<style>
-    body {
-        background: #f8fafc;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    }
-    
-    .profile-container {
-        max-width: 800px;
-        margin: 2rem auto;
-        padding: 0 1rem;
-    }
-    
-    .profile-card {
-        background: white;
-        border-radius: 16px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-        overflow: hidden;
-        margin-bottom: 1.5rem;
-    }
-    
-    .profile-header {
-        padding: 2rem;
-        text-align: center;
-        border-bottom: 1px solid #e2e8f0;
-    }
-    
-    .avatar {
-        width: 100px;
-        height: 100px;
-        border-radius: 50%;
-        object-fit: cover;
-        margin-bottom: 1rem;
-        border: 3px solid #667eea;
-    }
-    
-    .avatar.placeholder {
-        background: #667eea;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2rem;
-        font-weight: bold;
-        color: white;
-    }
-    
-    .profile-name {
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: #1a202c;
-        margin-bottom: 0.5rem;
-    }
-    
-    .profile-subtitle {
-        font-size: 1rem;
-        color: #718096;
-        margin-bottom: 1rem;
-    }
-    
-    .user-badge {
-        display: inline-block;
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        font-size: 0.875rem;
-        font-weight: 600;
-    }
-    
-    .badge-student {
-        background: #e6fffa;
-        color: #047857;
-    }
-    
-    .badge-company {
-        background: #fef7e6;
-        color: #b45309;
-    }
-    
-    .info-section {
-        padding: 1.5rem 2rem;
-    }
-    
-    .section-title {
-        font-size: 1.125rem;
-        font-weight: 600;
-        color: #374151;
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    
-    .info-grid {
-        display: grid;
-        gap: 1rem;
-    }
-    
-    .info-item {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.75rem 0;
-        border-bottom: 1px solid #f1f5f9;
-    }
-    
-    .info-item:last-child {
-        border-bottom: none;
-    }
-    
-    .info-label {
-        font-weight: 500;
-        color: #6b7280;
-    }
-    
-    .info-value {
-        font-weight: 500;
-        color: #374151;
-    }
-    
-    .instagram-link {
-        color: #e1306c;
-        text-decoration: none;
-        font-weight: 600;
-    }
-    
-    .instagram-link:hover {
-        color: #c13584;
-    }
-    
-    .tags-section {
-        padding: 1.5rem 2rem;
-        border-top: 1px solid #e2e8f0;
-    }
-    
-    .tags-container {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-    }
-    
-    .tag {
-        background: #f1f5f9;
-        color: #475569;
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        font-size: 0.875rem;
-        font-weight: 500;
-    }
-    
-    .actions {
-        padding: 1.5rem 2rem;
-        border-top: 1px solid #e2e8f0;
-        display: flex;
-        gap: 1rem;
-        justify-content: center;
-    }
-    
-    .btn {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.75rem 1.5rem;
-        border-radius: 8px;
-        font-weight: 500;
-        text-decoration: none;
-        transition: all 0.2s;
-        border: none;
-        cursor: pointer;
-    }
-    
-    .btn-primary {
-        background: #667eea;
-        color: white;
-    }
-    
-    .btn-primary:hover {
-        background: #5a67d8;
-        color: white;
-    }
-    
-    .btn-secondary {
-        background: #f8fafc;
-        color: #374151;
-        border: 1px solid #d1d5db;
-    }
-    
-    .btn-secondary:hover {
-        background: #f1f5f9;
-        color: #374151;
-    }
-    
-    .btn-danger {
-        background: #fef2f2;
-        color: #dc2626;
-        border: 1px solid #fecaca;
-    }
-    
-    .btn-danger:hover {
-        background: #fee2e2;
-        color: #dc2626;
-    }
-    
-    .meta-info {
-        display: flex;
-        justify-content: center;
-        gap: 2rem;
-        margin-top: 1rem;
-        flex-wrap: wrap;
-    }
-    
-    .meta-item {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        color: #6b7280;
-        font-size: 0.875rem;
-    }
-    
-    @media (max-width: 768px) {
-        .profile-container {
-            margin: 1rem auto;
-            padding: 0 0.5rem;
-        }
-        
-        .profile-header,
-        .info-section,
-        .tags-section,
-        .actions {
-            padding: 1rem;
-        }
-        
-        .actions {
-            flex-direction: column;
-        }
-        
-        .btn {
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: var(--text-primary);
+            display: flex;
             justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
         }
-        
-        .meta-info {
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-    }
-</style>
-{% endblock %}
 
-{% block content %}
-<div class="profile-container">
-    <!-- Header do Perfil -->
-    <div class="profile-card">
-        <div class="profile-header">
-            {% if user.profile_picture %}
-                <img src="{{ user.profile_picture.url }}" alt="Foto de Perfil" class="avatar">
-            {% else %}
-                <div class="avatar placeholder">{{ user.nickname|first|upper }}</div>
-            {% endif %}
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 119, 255, 0.2) 0%, transparent 50%);
+            z-index: -1;
+            animation: backgroundMove 20s ease-in-out infinite;
+        }
+
+        @keyframes backgroundMove {
+            0%, 100% { transform: translateX(0) translateY(0); }
+            25% { transform: translateX(-20px) translateY(-10px); }
+            50% { transform: translateX(20px) translateY(10px); }
+            75% { transform: translateX(-10px) translateY(20px); }
+        }
+
+        .profile-container {
+            width: 100%;
+            max-width: 780px;
+            margin: 0 auto;
+        }
+
+        .profile-card {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px var(--shadow);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .profile-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(225, 48, 108, 0.05), transparent);
+            animation: rotateBackground 10s linear infinite;
+            z-index: 0;
+        }
+
+        @keyframes rotateBackground {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .profile-banner {
+            height: 120px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light), var(--secondary));
+            position: relative;
+            z-index: 1;
+            transition: all 0.5s ease;
+            cursor: pointer;
+        }
+
+        .profile-banner:hover {
+            filter: brightness(1.1);
+        }
+
+        .profile-banner::after {
+            content: '';
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            width: 30px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='white' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z'/%3E%3C/svg%3E");
+            background-size: 16px;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .profile-banner:hover::after {
+            opacity: 1;
+        }
+
+        .color-picker-container {
+            position: absolute;
+            top: 10px;
+            right: 50px;
+            display: flex;
+            gap: 8px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 5;
+        }
+
+        .profile-banner:hover .color-picker-container {
+            opacity: 1;
+        }
+
+        .color-option {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .color-option:hover {
+            transform: scale(1.2);
+            border-color: white;
+        }
+
+        .color-option.gradient1 { background: linear-gradient(135deg, #E1306C, #F56040, #405DE6); }
+        .color-option.gradient2 { background: linear-gradient(135deg, #667eea, #764ba2); }
+        .color-option.gradient3 { background: linear-gradient(135deg, #f093fb, #f5576c); }
+        .color-option.gradient4 { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+        .color-option.gradient5 { background: linear-gradient(135deg, #a8edea, #fed6e3); }
+
+        .profile-avatar-container {
+            position: absolute;
+            bottom: -60px;
+            left: 30px;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 3px solid var(--border);
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+        }
+
+        .profile-avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            background: linear-gradient(135deg, var(--primary), var(--primary-light));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+        }
+
+        .profile-status {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background-color: var(--status-online);
+            border: 3px solid var(--glass);
+            z-index: 3;
+        }
+
+        .profile-content {
+            margin-top: 70px;
+            padding: 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .profile-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .profile-name {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .profile-badge {
+            background: linear-gradient(45deg, var(--primary), var(--primary-light));
+            color: white;
+            font-size: 12px;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(225, 48, 108, 0.3);
+        }
+
+        .profile-subtitle {
+            color: var(--text-secondary);
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        .profile-meta {
+            display: flex;
+            gap: 20px;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            animation: slideInRight 1s ease-out 0.6s both;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border-radius: 25px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: none;
+            text-decoration: none;
+            font-size: 0.9rem;
+            position: relative;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: buttonSlideIn 0.6s ease-out forwards;
+        }
+
+        .btn:nth-child(1) { animation-delay: 0.8s; }
+        .btn:nth-child(2) { animation-delay: 1.0s; }
+        .btn:nth-child(3) { animation-delay: 1.2s; }
+        .btn:nth-child(4) { animation-delay: 1.4s; }
+
+        @keyframes buttonSlideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--primary), var(--primary-light));
+            color: white;
+            box-shadow: 0 4px 15px rgba(225, 48, 108, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(225, 48, 108, 0.4);
+            filter: brightness(1.1);
+        }
+
+        .btn-secondary {
+            background: var(--glass);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: var(--primary);
+        }
+
+        .btn-outline {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            border: 2px solid var(--border);
+            backdrop-filter: blur(15px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-outline:hover {
+            background: var(--glass);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(225, 48, 108, 0.2);
+            color: var(--primary);
+        }
+
+        .btn-outline .fas {
+            transition: transform 0.3s ease;
+        }
+
+        .btn-outline:hover .fas {
+            transform: translateX(-3px);
+        }
+
+        .btn-danger {
+            background-color: transparent;
+            color: #ed4245;
+            border: 1px solid #ed4245;
+        }
+
+        .btn-danger:hover {
+            background-color: #ed4245;
+            color: white;
+        }
+
+        .profile-sections {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .profile-section {
+            background: var(--glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .profile-section:hover::before {
+            left: 100%;
+        }
+
+        .profile-section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--shadow);
+            border-color: var(--primary);
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .info-label {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .info-value {
+            font-weight: 500;
+            text-align: right;
+        }
+
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .tag {
+            background: linear-gradient(45deg, var(--primary), var(--primary-light));
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(225, 48, 108, 0.2);
+            transition: transform 0.2s ease;
+        }
+
+        .tag:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(225, 48, 108, 0.3);
+        }
+
+        .social-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .social-link:hover {
+            text-decoration: underline;
+            color: var(--primary-light);
+            transform: translateX(2px);
+        }
+
+        @media (max-width: 768px) {
+            .profile-sections {
+                grid-template-columns: 1fr;
+            }
             
-            <h1 class="profile-name">{{ user.nickname|default:user.username }}</h1>
+            .profile-header {
+                flex-direction: column;
+                gap: 15px;
+            }
             
-            {% if user.user_type == 'company' %}
-                <p class="profile-subtitle">{{ user.company_name|default:"Empresa Júnior" }}</p>
-                <span class="user-badge badge-company">🏢 Empresa Júnior</span>
-            {% else %}
-                <p class="profile-subtitle">{{ user.course|default:"Estudante" }}</p>
-                <span class="user-badge badge-student">🎓 Estudante</span>
-            {% endif %}
+            .profile-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
             
-            <div class="meta-info">
-                <div class="meta-item">
-                    <span>📧</span>
-                    <span>{{ user.email }}</span>
+            .profile-avatar-container {
+                left: 50%;
+                transform: translateX(-50%);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <div class="profile-card">
+            <div class="profile-banner" id="profileBanner">
+                <div class="color-picker-container">
+                    <div class="color-option gradient1" onclick="changeBannerColor('gradient1')"></div>
+                    <div class="color-option gradient2" onclick="changeBannerColor('gradient2')"></div>
+                    <div class="color-option gradient3" onclick="changeBannerColor('gradient3')"></div>
+                    <div class="color-option gradient4" onclick="changeBannerColor('gradient4')"></div>
+                    <div class="color-option gradient5" onclick="changeBannerColor('gradient5')"></div>
                 </div>
-                <div class="meta-item">
-                    <span>📅</span>
-                    <span>Desde {{ user.date_joined|date:"M/Y" }}</span>
+                <div class="profile-avatar-container">
+                    <div class="profile-avatar">
+                        {{ user.nickname|first|upper }}
+                    </div>
+                    <div class="profile-status"></div>
                 </div>
             </div>
-        </div>
-        
-        <!-- Informações -->
-        <div class="info-section">
-            {% if user.user_type == 'student' %}
-                <h3 class="section-title">
-                    <span>🎓</span>
-                    Informações Acadêmicas
-                </h3>
-                <div class="info-grid">
-                    <div class="info-item">
-                        <span class="info-label">Curso</span>
-                        <span class="info-value">{{ user.course|default:"Não informado" }}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Período</span>
-                        <span class="info-value">{{ user.semester|default:"Não informado" }}</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label">Universidade</span>
-                        <span class="info-value">{{ user.university|default:"Não informado" }}</span>
-                    </div>
-                </div>
-            {% else %}
-                <h3 class="section-title">
-                    <span>🏢</span>
-                    Informações da Empresa
-                </h3>
-                <div class="info-grid">
-                    <div class="info-item">
-                        <span class="info-label">Nome</span>
-                        <span class="info-value">{{ user.company_name|default:"Não informado" }}</span>
-                    </div>
-                    {% if user.company_instagram %}
-                        <div class="info-item">
-                            <span class="info-label">Instagram</span>
-                            <a href="https://instagram.com/{{ user.company_instagram }}" target="_blank" class="instagram-link info-value">
-                                @{{ user.company_instagram }}
-                            </a>
+            
+            <div class="profile-content">
+                <div class="profile-header">
+                    <div class="profile-info">
+                        <h1 class="profile-name">
+                            {{ user.nickname|default:user.username }}
+                            <span class="profile-badge">
+                                {% if user.user_type == 'company' %}Empresa{% else %}Estudante{% endif %}
+                            </span>
+                        </h1>
+                        <p class="profile-subtitle">
+                            {% if user.user_type == 'company' %}
+                                {{ user.company_name|default:"Empresa Júnior" }}
+                            {% else %}
+                                {{ user.course|default:"Estudante" }} • {{ user.university|default:"Universidade" }}
+                            {% endif %}
+                        </p>
+                        <div class="profile-meta">
+                            <div class="meta-item">
+                                <i class="far fa-envelope"></i>
+                                <span>{{ user.email }}</span>
+                            </div>
+                            <div class="meta-item">
+                                <i class="far fa-calendar"></i>
+                                <span>Desde {{ user.date_joined|date:"M/Y" }}</span>
+                            </div>
                         </div>
-                    {% endif %}
-                    <div class="info-item">
-                        <span class="info-label">Fundada</span>
-                        <span class="info-value">{{ user.date_joined|date:"Y" }}</span>
+                    </div>
+                    
+                    <div class="profile-actions">
+                        <a href="{% url 'core:home' %}" class="btn btn-outline">
+                            <i class="fas fa-arrow-left"></i> Voltar
+                        </a>
+                        <a href="#" class="btn btn-primary" onclick="alert('Funcionalidade de edição em desenvolvimento!')">
+                            <i class="fas fa-pen"></i> Editar
+                        </a>
+                        <a href="{% url 'messaging:conversations_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-comment"></i> Mensagem
+                        </a>
+                        <a href="{% url 'accounts:logout' %}" class="btn btn-danger" onclick="return confirm('Tem certeza que deseja sair?')">
+                            <i class="fas fa-sign-out-alt"></i> Sair
+                        </a>
                     </div>
                 </div>
                 
-                {% if user.company_description %}
-                    <div style="margin-top: 1.5rem;">
-                        <h4 class="section-title">
-                            <span>📝</span>
-                            Sobre
-                        </h4>
-                        <p style="color: #6b7280; line-height: 1.6;">
-                            {{ user.company_description }}
-                        </p>
+                <div class="profile-sections">
+                    <div class="profile-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-graduation-cap"></i>
+                            Informações {% if user.user_type == 'student' %}Acadêmicas{% else %}da Empresa{% endif %}
+                        </h3>
+                        <div class="info-grid">
+                            {% if user.user_type == 'student' %}
+                                <div class="info-item">
+                                    <span class="info-label">Curso</span>
+                                    <span class="info-value">{{ user.course|default:"Não informado" }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Período</span>
+                                    <span class="info-value">{{ user.semester|default:"Não informado" }}</span>
+                                </div>
+                                <div class="info-item">
+                                    <span class="info-label">Universidade</span>
+                                    <span class="info-value">{{ user.university|default:"Não informado" }}</span>
+                                </div>
+                            {% else %}
+                                <div class="info-item">
+                                    <span class="info-label">Nome</span>
+                                    <span class="info-value">{{ user.company_name|default:"Não informado" }}</span>
+                                </div>
+                                {% if user.company_instagram %}
+                                <div class="info-item">
+                                    <span class="info-label">Instagram</span>
+                                    <a href="https://instagram.com/{{ user.company_instagram }}" target="_blank" class="social-link info-value">
+                                        <i class="fab fa-instagram"></i> @{{ user.company_instagram }}
+                                    </a>
+                                </div>
+                                {% endif %}
+                                <div class="info-item">
+                                    <span class="info-label">Fundada em</span>
+                                    <span class="info-value">{{ user.date_joined|date:"Y" }}</span>
+                                </div>
+                            {% endif %}
+                        </div>
                     </div>
-                {% endif %}
-            {% endif %}
-        </div>
-        
-        <!-- Tags/Habilidades -->
-        <div class="tags-section">
-            <h3 class="section-title">
-                <span>⚡</span>
-                {% if user.user_type == 'student' %}Habilidades{% else %}Especialidades{% endif %}
-            </h3>
-            <div class="tags-container">
-                {% if user.user_type == 'student' %}
-                    <span class="tag">Python</span>
-                    <span class="tag">JavaScript</span>
-                    <span class="tag">React</span>
-                    <span class="tag">Design</span>
-                    <span class="tag">Excel</span>
-                    <span class="tag">Comunicação</span>
-                    <span class="tag">Liderança</span>
-                {% else %}
-                    <span class="tag">Consultoria</span>
-                    <span class="tag">Desenvolvimento Web</span>
-                    <span class="tag">Design Gráfico</span>
-                    <span class="tag">Marketing Digital</span>
-                    <span class="tag">Gestão de Projetos</span>
-                    <span class="tag">Análise de Dados</span>
+                    
+                    <div class="profile-section">
+                        <h3 class="section-title">
+                            <i class="fas fa-star"></i>
+                            {% if user.user_type == 'student' %}Habilidades{% else %}Especialidades{% endif %}
+                        </h3>
+                        <div class="tags-container">
+                            {% if user.user_type == 'student' %}
+                                <span class="tag">Python</span>
+                                <span class="tag">JavaScript</span>
+                                <span class="tag">React</span>
+                                <span class="tag">Design</span>
+                                <span class="tag">Comunicação</span>
+                            {% else %}
+                                <span class="tag">Consultoria</span>
+                                <span class="tag">Desenvolvimento</span>
+                                <span class="tag">Design</span>
+                                <span class="tag">Marketing</span>
+                                <span class="tag">Gestão</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                {% if user.user_type == 'company' and user.company_description %}
+                <div class="profile-section" style="grid-column: 1 / -1; margin-top: 0;">
+                    <h3 class="section-title">
+                        <i class="fas fa-info-circle"></i>
+                        Sobre
+                    </h3>
+                    <p style="line-height: 1.6; color: var(--text-secondary);">
+                        {{ user.company_description }}
+                    </p>
+                </div>
                 {% endif %}
             </div>
         </div>
-        
-        <!-- Ações -->
-        <div class="actions">
-            <a href="#" class="btn btn-primary">
-                <span>✏️</span>
-                Editar Perfil
-            </a>
-            <a href="{% url 'messaging:conversations_list' %}" class="btn btn-secondary">
-                <span>💬</span>
-                Mensagens
-            </a>
-            <a href="{% url 'accounts:logout' %}" class="btn btn-danger">
-                <span>🚪</span>
-                Sair
-            </a>
-        </div>
     </div>
-</div>
-{% endblock %}
+
+    <script>
+        // Função para trocar cor do banner
+        function changeBannerColor(gradientClass) {
+            const banner = document.getElementById('profileBanner');
+            const gradients = {
+                'gradient1': 'linear-gradient(135deg, #E1306C, #F56040, #405DE6)',
+                'gradient2': 'linear-gradient(135deg, #667eea, #764ba2)',
+                'gradient3': 'linear-gradient(135deg, #f093fb, #f5576c)',
+                'gradient4': 'linear-gradient(135deg, #4facfe, #00f2fe)',
+                'gradient5': 'linear-gradient(135deg, #a8edea, #fed6e3)'
+            };
+            
+            banner.style.background = gradients[gradientClass];
+            
+            // Salvar preferência no localStorage
+            localStorage.setItem('bannerGradient', gradientClass);
+            
+            // Feedback visual
+            banner.style.transform = 'scale(1.02)';
+            setTimeout(() => {
+                banner.style.transform = 'scale(1)';
+            }, 200);
+        }
+
+        // Animação de entrada suave
+        document.addEventListener('DOMContentLoaded', function() {
+            // Carregar cor salva do banner
+            const savedGradient = localStorage.getItem('bannerGradient');
+            if (savedGradient) {
+                changeBannerColor(savedGradient);
+            }
+            
+            const profileCard = document.querySelector('.profile-card');
+            profileCard.style.opacity = '0';
+            profileCard.style.transform = 'translateY(30px)';
+            
+            setTimeout(() => {
+                profileCard.style.transition = 'all 0.8s ease-out';
+                profileCard.style.opacity = '1';
+                profileCard.style.transform = 'translateY(0)';
+            }, 100);
+            
+            // Animação das tags
+            const tags = document.querySelectorAll('.tag');
+            tags.forEach((tag, index) => {
+                tag.style.opacity = '0';
+                tag.style.transform = 'scale(0.8)';
+                setTimeout(() => {
+                    tag.style.transition = 'all 0.4s ease-out';
+                    tag.style.opacity = '1';
+                    tag.style.transform = 'scale(1)';
+                }, 800 + (index * 100));
+            });
+
+            // Animação dos cards de informação
+            const sections = document.querySelectorAll('.profile-section');
+            sections.forEach((section, index) => {
+                section.style.opacity = '0';
+                section.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    section.style.transition = 'all 0.6s ease-out';
+                    section.style.opacity = '1';
+                    section.style.transform = 'translateY(0)';
+                }, 1000 + (index * 200));
+            });
+        });
+    </script>
+</body>
+</html>

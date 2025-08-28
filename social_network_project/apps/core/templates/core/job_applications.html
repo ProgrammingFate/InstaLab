@@ -1,0 +1,1389 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Candidaturas - {{ job.title }} - InstaLab{% endblock %}
+
+{% block content %}
+<div class="job-applications-page">
+    <div class="container">
+        <!-- Header da página -->
+        <div class="page-header">
+            <div class="header-content">
+                <div class="breadcrumb">
+                    <a href="{% url 'core:my_jobs' %}">Minhas Vagas</a>
+                    <span>/</span>
+                    <span>Candidaturas</span>
+                </div>
+                <h1>{{ job.title }}</h1>
+                <div class="job-meta">
+                    <span class="meta-item">
+                        <i class="fas fa-building"></i>
+                        {{ job.company.company_name|default:job.company.nickname }}
+                    </span>
+                    <span class="meta-item">
+                        <i class="fas fa-calendar"></i>
+                        Publicada em {{ job.created_at|date:"d/m/Y" }}
+                    </span>
+                    <span class="meta-item">
+                        <i class="fas fa-users"></i>
+                        {{ applications.count }} candidatura{{ applications.count|pluralize }}
+                    </span>
+                </div>
+            </div>
+            <div class="header-actions">
+                <a href="{% url 'core:vaga_detail' job.id %}" class="btn btn-outline">
+                    <i class="fas fa-eye"></i> Ver Vaga
+                </a>
+                <a href="{% url 'core:my_jobs' %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i> Voltar
+                </a>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="main-content-wrapper">
+            <!-- Statistics Sidebar -->
+            <div class="stats-sidebar">
+                <div class="stats-header">
+                    <h3>
+                        <i class="fas fa-chart-bar"></i>
+                        Analytics
+                    </h3>
+                    <div class="stats-subtitle">Estatísticas em tempo real</div>
+                </div>
+
+                <!-- Progress Ring -->
+                <div class="progress-ring-container">
+                    <div class="progress-ring-wrapper">
+                        <svg class="progress-ring" width="120" height="120">
+                            <circle
+                                class="progress-ring-background"
+                                stroke="#e5e5e5"
+                                stroke-width="8"
+                                fill="transparent"
+                                r="52"
+                                cx="60"
+                                cy="60"/>
+                            <circle
+                                class="progress-ring-progress"
+                                stroke="url(#gradient1)"
+                                stroke-width="8"
+                                fill="transparent"
+                                r="52"
+                                cx="60"
+                                cy="60"
+                                style="stroke-dasharray: {{ total_circumference }}; stroke-dashoffset: {{ dash_offset }}"/>
+                            <defs>
+                                <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                        <div class="progress-center">
+                            <div class="total-number">{{ applications.count }}</div>
+                            <div class="total-label">Total</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mini Stats -->
+                <div class="mini-stats">
+                    <div class="mini-stat pending">
+                        <div class="mini-stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="mini-stat-info">
+                            <div class="mini-stat-number">{{ pending_count }}</div>
+                            <div class="mini-stat-label">Pendentes</div>
+                            <div class="mini-stat-percentage">{{ pending_percentage }}%</div>
+                        </div>
+                        <div class="mini-stat-bar">
+                            <div class="mini-stat-fill pending-fill" style="width: {{ pending_percentage }}%"></div>
+                        </div>
+                    </div>
+
+                    <div class="mini-stat accepted">
+                        <div class="mini-stat-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="mini-stat-info">
+                            <div class="mini-stat-number">{{ accepted_count }}</div>
+                            <div class="mini-stat-label">Aceitas</div>
+                            <div class="mini-stat-percentage">{{ accepted_percentage }}%</div>
+                        </div>
+                        <div class="mini-stat-bar">
+                            <div class="mini-stat-fill accepted-fill" style="width: {{ accepted_percentage }}%"></div>
+                        </div>
+                    </div>
+
+                    <div class="mini-stat rejected">
+                        <div class="mini-stat-icon">
+                            <i class="fas fa-times-circle"></i>
+                        </div>
+                        <div class="mini-stat-info">
+                            <div class="mini-stat-number">{{ rejected_count }}</div>
+                            <div class="mini-stat-label">Rejeitadas</div>
+                            <div class="mini-stat-percentage">{{ rejected_percentage }}%</div>
+                        </div>
+                        <div class="mini-stat-bar">
+                            <div class="mini-stat-fill rejected-fill" style="width: {{ rejected_percentage }}%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <h4>
+                        <i class="fas fa-bolt"></i>
+                        Ações Rápidas
+                    </h4>
+                    <div class="action-buttons">
+                        <button class="action-btn export-btn" onclick="exportData()">
+                            <i class="fas fa-download"></i>
+                            Exportar
+                        </button>
+                        <button class="action-btn notify-btn" onclick="notifyAll()">
+                            <i class="fas fa-bell"></i>
+                            Notificar
+                        </button>
+                        <button class="action-btn filter-btn" onclick="toggleFilters()">
+                            <i class="fas fa-filter"></i>
+                            Filtros
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="recent-activity">
+                    <h4>
+                        <i class="fas fa-history"></i>
+                        Atividade Recente
+                    </h4>
+                    <div class="activity-list">
+                        {% for application in applications|slice:":3" %}
+                        <div class="activity-item">
+                            <div class="activity-avatar">
+                                {{ application.applicant.nickname|first|upper|default:application.applicant.username|first|upper }}
+                            </div>
+                            <div class="activity-info">
+                                <div class="activity-name">{{ application.applicant.nickname|default:application.applicant.username }}</div>
+                                <div class="activity-action">se candidatou</div>
+                                <div class="activity-time">{{ application.applied_at|timesince }} atrás</div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="no-activity">
+                            <i class="fas fa-inbox"></i>
+                            <span>Nenhuma atividade</span>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Applications Content -->
+            <div class="applications-main-content">
+                <!-- Lista de candidaturas -->
+                <div class="applications-section">
+                    {% if applications %}
+                        <div class="applications-header">
+                            <h2>
+                                <i class="fas fa-users"></i>
+                                Candidaturas Recebidas
+                            </h2>
+                            <div class="filter-options">
+                                <select class="status-filter" onchange="filterApplications(this.value)">
+                                    <option value="all">Todas as candidaturas</option>
+                                    <option value="applied">Aguardando análise</option>
+                                    <option value="accepted">Aceitas</option>
+                                    <option value="rejected">Rejeitadas</option>
+                                </select>
+                            </div>
+                        </div>
+
+                <div class="applications-list">
+                    {% for application in applications %}
+                    <div class="application-card" data-status="{{ application.status }}">
+                        <div class="application-header">
+                            <div class="applicant-info">
+                                <div class="applicant-avatar">
+                                    {{ application.applicant.nickname|first|upper|default:application.applicant.username|first|upper }}
+                                </div>
+                                <div class="applicant-details">
+                                    <h3>{{ application.applicant.nickname|default:application.applicant.username }}</h3>
+                                    <p class="applicant-email">{{ application.applicant.email }}</p>
+                                    {% if application.applicant.course %}
+                                    <p class="applicant-course">
+                                        <i class="fas fa-graduation-cap"></i>
+                                        {{ application.applicant.course }} - {{ application.applicant.university|default:"Universidade" }}
+                                    </p>
+                                    {% endif %}
+                                    {% if application.applicant.semester %}
+                                    <p class="applicant-semester">
+                                        <i class="fas fa-calendar-alt"></i>
+                                        {{ application.applicant.semester }}
+                                    </p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="application-meta">
+                                <div class="application-status status-{{ application.status }}">
+                                    {% if application.status == 'applied' %}
+                                        <i class="fas fa-clock"></i> Aguardando
+                                    {% elif application.status == 'accepted' %}
+                                        <i class="fas fa-check-circle"></i> Aceita
+                                    {% elif application.status == 'rejected' %}
+                                        <i class="fas fa-times-circle"></i> Rejeitada
+                                    {% elif application.status == 'reviewing' %}
+                                        <i class="fas fa-search"></i> Em Análise
+                                    {% endif %}
+                                </div>
+                                <div class="application-date">
+                                    <i class="fas fa-calendar"></i>
+                                    {{ application.applied_at|date:"d/m/Y" }}
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if application.cover_letter %}
+                        <div class="cover-letter">
+                            <h4><i class="fas fa-envelope"></i> Carta de Apresentação</h4>
+                            <div class="letter-content">
+                                {{ application.cover_letter|linebreaks }}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        {% if application.resume %}
+                        <div class="resume-section">
+                            <h4><i class="fas fa-file-alt"></i> Currículo</h4>
+                            <a href="{{ application.resume.url }}" target="_blank" class="resume-link">
+                                <i class="fas fa-download"></i>
+                                Baixar Currículo
+                            </a>
+                        </div>
+                        {% endif %}
+
+                        {% if application.status == 'applied' %}
+                        <div class="application-actions">
+                            <button class="btn btn-success" onclick="processApplication({{ application.id }}, 'accept')">
+                                <i class="fas fa-check"></i>
+                                Aceitar
+                            </button>
+                            <button class="btn btn-danger" onclick="processApplication({{ application.id }}, 'reject')">
+                                <i class="fas fa-times"></i>
+                                Rejeitar
+                            </button>
+                            <button class="btn btn-secondary" onclick="contactApplicant('{{ application.applicant.email }}')">
+                                <i class="fas fa-envelope"></i>
+                                Contatar
+                            </button>
+                        </div>
+                        {% endif %}
+
+                        {% if application.internal_notes %}
+                        <div class="internal-notes">
+                            <h4><i class="fas fa-sticky-note"></i> Notas Internas</h4>
+                            <p>{{ application.internal_notes }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="no-applications">
+                        <div class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <h3>Nenhuma candidatura ainda</h3>
+                            <p>Quando estudantes se candidatarem a esta vaga, elas aparecerão aqui.</p>
+                            <a href="{% url 'core:vaga_detail' job.id %}" class="btn btn-primary">
+                                <i class="fas fa-share"></i>
+                                Compartilhar Vaga
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmação -->
+<div id="confirmModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 id="modalTitle"></h3>
+            <span class="close" onclick="closeModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+            <p id="modalMessage"></p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+            <button id="confirmBtn" class="btn btn-primary" onclick="confirmAction()">Confirmar</button>
+        </div>
+    </div>
+</div>
+
+<style>
+.job-applications-page {
+    padding: 40px 0 80px;
+    min-height: 100vh;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 40px;
+    padding: 30px;
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.header-content {
+    flex: 1;
+}
+
+.breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 15px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.breadcrumb a {
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.page-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 15px;
+}
+
+.job-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    color: var(--text-secondary);
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.9rem;
+}
+
+.header-actions {
+    display: flex;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+/* Main Content Layout */
+.main-content-wrapper {
+    display: grid;
+    grid-template-columns: 350px 1fr;
+    gap: 30px;
+    animation: fadeInUp 0.6s ease-out 0.2s both;
+}
+
+/* Stats Sidebar */
+.stats-sidebar {
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 30px;
+    height: fit-content;
+    position: sticky;
+    top: 20px;
+    animation: slideInLeft 0.8s ease-out;
+}
+
+.stats-header h3 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
+}
+
+.stats-subtitle {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 30px;
+}
+
+/* Progress Ring */
+.progress-ring-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.progress-ring-wrapper {
+    position: relative;
+}
+
+.progress-ring {
+    transform: rotate(-90deg);
+    transition: all 0.5s ease;
+}
+
+.progress-ring-background {
+    opacity: 0.1;
+}
+
+.progress-ring-progress {
+    stroke-linecap: round;
+    transition: stroke-dashoffset 1s ease-in-out;
+}
+
+.progress-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.total-number {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.total-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+/* Mini Stats */
+.mini-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.mini-stat {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.mini-stat:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateX(5px);
+}
+
+.mini-stat-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    color: white;
+    flex-shrink: 0;
+}
+
+.mini-stat.pending .mini-stat-icon { background: linear-gradient(45deg, #f59e0b, #fbbf24); }
+.mini-stat.accepted .mini-stat-icon { background: linear-gradient(45deg, #10b981, #34d399); }
+.mini-stat.rejected .mini-stat-icon { background: linear-gradient(45deg, #ef4444, #f87171); }
+
+.mini-stat-info {
+    flex: 1;
+}
+
+.mini-stat-number {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.mini-stat-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+
+.mini-stat-percentage {
+    font-size: 0.75rem;
+    font-weight: 600;
+    opacity: 0.7;
+}
+
+.mini-stat.pending .mini-stat-percentage { color: #f59e0b; }
+.mini-stat.accepted .mini-stat-percentage { color: #10b981; }
+.mini-stat.rejected .mini-stat-percentage { color: #ef4444; }
+
+.mini-stat-bar {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.mini-stat-fill {
+    height: 100%;
+    transition: width 1s ease-in-out;
+    border-radius: 0 2px 2px 0;
+}
+
+.pending-fill { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+.accepted-fill { background: linear-gradient(90deg, #10b981, #34d399); }
+.rejected-fill { background: linear-gradient(90deg, #ef4444, #f87171); }
+
+/* Quick Actions */
+.quick-actions {
+    margin-bottom: 30px;
+    padding-top: 25px;
+    border-top: 1px solid var(--border);
+}
+
+.quick-actions h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--primary);
+    color: var(--primary);
+    transform: translateX(2px);
+}
+
+/* Recent Activity */
+.recent-activity {
+    padding-top: 25px;
+    border-top: 1px solid var(--border);
+}
+
+.recent-activity h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.activity-item:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.activity-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, var(--primary), var(--primary-light));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.8rem;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.activity-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.activity-name {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.activity-action {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.activity-time {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    opacity: 0.7;
+}
+
+.no-activity {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 20px;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+.no-activity i {
+    font-size: 1.5rem;
+    opacity: 0.5;
+}
+
+/* Applications Main Content */
+.applications-main-content {
+    animation: fadeInUp 0.6s ease-out 0.4s both;
+}
+
+.applications-section {
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 30px;
+}
+
+.applications-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.applications-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.status-filter {
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--glass);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.applications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.application-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    transition: all 0.3s ease;
+}
+
+.application-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px var(--shadow);
+}
+
+.application-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+.applicant-info {
+    display: flex;
+    gap: 16px;
+    flex: 1;
+}
+
+.applicant-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, var(--primary), var(--primary-light));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.applicant-details h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.applicant-email {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+}
+
+.applicant-course,
+.applicant-semester {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 4px;
+}
+
+.application-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+}
+
+.application-status {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.status-applied { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+.status-accepted { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
+.status-rejected { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+.status-reviewing { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+
+.application-date {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.cover-letter,
+.resume-section,
+.internal-notes {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+}
+
+.cover-letter h4,
+.resume-section h4,
+.internal-notes h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.letter-content {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 16px;
+    line-height: 1.6;
+    color: var(--text-secondary);
+}
+
+.resume-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    background: var(--primary);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.resume-link:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(225, 48, 108, 0.3);
+    text-decoration: none;
+    color: white;
+}
+
+.application-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+}
+
+.btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.btn-success {
+    background: #22c55e;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #16a34a;
+    transform: translateY(-1px);
+}
+
+.btn-danger {
+    background: #ef4444;
+    color: white;
+}
+
+.btn-danger:hover {
+    background: #dc2626;
+    transform: translateY(-1px);
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, var(--primary), var(--primary-light));
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.1);
+}
+
+.btn-secondary {
+    background: var(--glass);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--primary);
+    border: 1px solid var(--primary);
+}
+
+.btn-outline:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-1px);
+}
+
+.no-applications {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.empty-state {
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.empty-state i {
+    font-size: 4rem;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+}
+
+.empty-state h3 {
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+}
+
+.empty-state p {
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+    line-height: 1.6;
+}
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    margin: 15% auto;
+    padding: 0;
+    border-radius: 16px;
+    width: 90%;
+    max-width: 500px;
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.modal-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.close {
+    color: var(--text-secondary);
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close:hover {
+    color: var(--text-primary);
+}
+
+.modal-body {
+    padding: 20px 24px;
+}
+
+.modal-body p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin: 0;
+}
+
+.modal-footer {
+    padding: 20px 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+/* Responsividade */
+@media (max-width: 1200px) {
+    .main-content-wrapper {
+        grid-template-columns: 300px 1fr;
+        gap: 20px;
+    }
+}
+
+@media (max-width: 992px) {
+    .main-content-wrapper {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    
+    .stats-sidebar {
+        position: static;
+        order: 2;
+    }
+    
+    .applications-main-content {
+        order: 1;
+    }
+}
+
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .header-actions {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .job-meta {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .applications-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: stretch;
+    }
+    
+    .application-header {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .application-meta {
+        align-items: flex-start;
+        flex-direction: row;
+        justify-content: space-between;
+        width: 100%;
+    }
+    
+    .application-actions {
+        flex-direction: column;
+    }
+    
+    .btn {
+        justify-content: center;
+    }
+    
+    .mini-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .action-buttons {
+        flex-direction: row;
+        gap: 8px;
+    }
+    
+    .action-btn {
+        flex: 1;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .applicant-info {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .applicant-avatar {
+        align-self: center;
+    }
+}
+
+/* Filtros */
+.application-card[data-status]:not([data-status="all"]) {
+    display: block;
+}
+
+.application-card.hidden {
+    display: none;
+}
+</style>
+
+<script>
+let currentAction = null;
+let currentApplicationId = null;
+
+function filterApplications(status) {
+    const cards = document.querySelectorAll('.application-card');
+    
+    cards.forEach(card => {
+        if (status === 'all' || card.dataset.status === status) {
+            card.classList.remove('hidden');
+        } else {
+            card.classList.add('hidden');
+        }
+    });
+}
+
+function processApplication(applicationId, action) {
+    currentApplicationId = applicationId;
+    currentAction = action;
+    
+    const modal = document.getElementById('confirmModal');
+    const title = document.getElementById('modalTitle');
+    const message = document.getElementById('modalMessage');
+    const confirmBtn = document.getElementById('confirmBtn');
+    
+    if (action === 'accept') {
+        title.textContent = 'Aceitar Candidatura';
+        message.textContent = 'Tem certeza que deseja aceitar esta candidatura? O candidato será notificado por email.';
+        confirmBtn.textContent = 'Aceitar';
+        confirmBtn.className = 'btn btn-success';
+    } else {
+        title.textContent = 'Rejeitar Candidatura';
+        message.textContent = 'Tem certeza que deseja rejeitar esta candidatura? O candidato será notificado por email.';
+        confirmBtn.textContent = 'Rejeitar';
+        confirmBtn.className = 'btn btn-danger';
+    }
+    
+    modal.style.display = 'block';
+}
+
+function confirmAction() {
+    if (currentApplicationId && currentAction) {
+        // Aqui você pode fazer uma requisição AJAX para processar a candidatura
+        // Por enquanto, vamos apenas mostrar uma mensagem
+        alert(`Candidatura ${currentAction === 'accept' ? 'aceita' : 'rejeitada'} com sucesso!`);
+        
+        // Atualizar a página ou remover/atualizar o card
+        location.reload();
+    }
+    
+    closeModal();
+}
+
+function closeModal() {
+    document.getElementById('confirmModal').style.display = 'none';
+    currentAction = null;
+    currentApplicationId = null;
+}
+
+function contactApplicant(email) {
+    window.location.href = `mailto:${email}`;
+}
+
+// Novas funções para o sidebar
+function exportData() {
+    // Simular export de dados
+    showNotification('Dados exportados com sucesso!', 'success');
+}
+
+function notifyAll() {
+    // Simular notificação em massa
+    showNotification('Notificações enviadas para todos os candidatos!', 'info');
+}
+
+function toggleFilters() {
+    // Toggle dos filtros avançados
+    const filterSection = document.querySelector('.filter-options');
+    filterSection.style.display = filterSection.style.display === 'none' ? 'block' : 'none';
+}
+
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'times-circle' : 'info-circle'}"></i>
+        <span>${message}</span>
+    `;
+    
+    // Adicionar estilos inline para a notificação
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: var(--glass);
+        backdrop-filter: blur(20px);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 16px 20px;
+        color: var(--text-primary);
+        z-index: 1001;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        animation: slideInRight 0.3s ease-out;
+        box-shadow: 0 8px 25px var(--shadow);
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Remover após 3 segundos
+    setTimeout(() => {
+        notification.style.animation = 'slideOutRight 0.3s ease-out';
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 3000);
+}
+
+// Fechar modal ao clicar fora dele
+window.onclick = function(event) {
+    const modal = document.getElementById('confirmModal');
+    if (event.target === modal) {
+        closeModal();
+    }
+}
+
+// Animações de entrada e configuração inicial
+document.addEventListener('DOMContentLoaded', function() {
+    // Animar cards das candidaturas
+    const cards = document.querySelectorAll('.application-card');
+    cards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            card.style.transition = 'all 0.6s ease-out';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, 800 + (index * 100));
+    });
+    
+    // Animar o anel de progresso
+    const progressRing = document.querySelector('.progress-ring-progress');
+    if (progressRing) {
+        setTimeout(() => {
+            progressRing.style.transition = 'stroke-dashoffset 1.5s ease-in-out';
+        }, 1000);
+    }
+    
+    // Animar as barras de mini stats
+    const miniFills = document.querySelectorAll('.mini-stat-fill');
+    miniFills.forEach((fill, index) => {
+        const originalWidth = fill.style.width;
+        fill.style.width = '0%';
+        setTimeout(() => {
+            fill.style.transition = 'width 1s ease-in-out';
+            fill.style.width = originalWidth;
+        }, 1200 + (index * 200));
+    });
+    
+    // Adicionar estilos CSS para as animações
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes slideOutRight {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+        }
+        
+        .notification-success { border-left: 4px solid #22c55e; }
+        .notification-error { border-left: 4px solid #ef4444; }
+        .notification-info { border-left: 4px solid #3b82f6; }
+    `;
+    document.head.appendChild(style);
+});
+</script>
+{% endblock %}

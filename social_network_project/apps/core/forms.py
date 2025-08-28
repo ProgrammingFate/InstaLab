@@ -32,12 +32,12 @@ class JobListingForm(forms.ModelForm):
             }),
             'salary_min': forms.NumberInput(attrs={
                 'class': 'form-control',
-                'placeholder': '800',
+                'placeholder': '800 (opcional)',
                 'step': '0.01'
             }),
             'salary_max': forms.NumberInput(attrs={
                 'class': 'form-control',
-                'placeholder': '1200',
+                'placeholder': '1200 (opcional)',
                 'step': '0.01'
             }),
             'spots_available': forms.NumberInput(attrs={
@@ -66,8 +66,8 @@ class JobListingForm(forms.ModelForm):
             'description': 'Descrição',
             'requirements': 'Requisitos',
             'responsibilities': 'Responsabilidades',
-            'salary_min': 'Salário Mínimo (R$)',
-            'salary_max': 'Salário Máximo (R$)',
+            'salary_min': 'Salário Mínimo (R$ - Opcional)',
+            'salary_max': 'Salário Máximo (R$ - Opcional)',
             'spots_available': 'Número de Vagas',
             'location': 'Localização',
             'remote_work': 'Trabalho Remoto',

@@ -176,9 +176,37 @@ def job_applications(request, job_id):
     job = get_object_or_404(JobListing, id=job_id, company=request.user)
     applications = JobApplication.objects.filter(job=job).order_by('-applied_at')
     
+    # Estatísticas das candidaturas
+    total_count = applications.count()
+    accepted_count = applications.filter(status='accepted').count()
+    rejected_count = applications.filter(status='rejected').count()
+    pending_count = applications.filter(status='applied').count()
+    
+    # Calcular porcentagens
+    if total_count > 0:
+        pending_percentage = round((pending_count / total_count) * 100)
+        accepted_percentage = round((accepted_count / total_count) * 100)
+        rejected_percentage = round((rejected_count / total_count) * 100)
+        
+        # Para o anel de progresso (circunferência total = 2 * π * raio)
+        total_circumference = 2 * 3.14159 * 52  # raio = 52
+        dash_offset = total_circumference * (1 - (total_count / max(total_count, 10)))
+    else:
+        pending_percentage = accepted_percentage = rejected_percentage = 0
+        total_circumference = 327
+        dash_offset = 327
+    
     context = {
         'job': job,
         'applications': applications,
+        'accepted_count': accepted_count,
+        'rejected_count': rejected_count,
+        'pending_count': pending_count,
+        'pending_percentage': pending_percentage,
+        'accepted_percentage': accepted_percentage,
+        'rejected_percentage': rejected_percentage,
+        'total_circumference': total_circumference,
+        'dash_offset': dash_offset,
     }
     
     return render(request, 'core/job_applications.html', context)

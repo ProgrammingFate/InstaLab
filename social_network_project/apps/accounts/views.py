@@ -24,7 +24,8 @@ def login_view(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            return redirect('accounts:profile')  # namespace corrigido
+            messages.success(request, f'Bem-vindo(a), {user.nickname or user.username}!')
+            return redirect('core:home')  # Redirecionando para a home
     else:
         form = UserLoginForm()
     return render(request, 'accounts/login.html', {'form': form})
