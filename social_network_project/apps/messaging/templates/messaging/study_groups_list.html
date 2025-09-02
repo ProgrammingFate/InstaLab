@@ -1,0 +1,298 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Grupos de Estudo - InstaLab{% endblock %}
+
+{% block extra_css %}
+<style>
+    .groups-container {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    
+    .group-card {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+    
+    .group-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(106, 90, 205, 0.3);
+    }
+    
+    .group-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .group-icon {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(45deg, #6A5ACD, #9370DB);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+        font-size: 24px;
+    }
+    
+    .group-info h5 {
+        color: white;
+        margin: 0;
+        font-weight: 600;
+    }
+    
+    .group-meta {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 14px;
+        margin: 0;
+    }
+    
+    .group-stats {
+        display: flex;
+        gap: 20px;
+        margin: 15px 0;
+    }
+    
+    .stat-item {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 14px;
+    }
+    
+    .stat-number {
+        color: #6A5ACD;
+        font-weight: bold;
+    }
+    
+    .join-btn {
+        background: linear-gradient(45deg, #6A5ACD, #9370DB);
+        border: none;
+        border-radius: 25px;
+        padding: 8px 20px;
+        color: white;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+    
+    .join-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(106, 90, 205, 0.4);
+    }
+    
+    .joined-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .create-group-btn {
+        background: linear-gradient(45deg, #FF6B6B, #FF8E53);
+        border: none;
+        border-radius: 25px;
+        padding: 15px 30px;
+        color: white;
+        font-weight: 500;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        transition: all 0.3s ease;
+    }
+    
+    .create-group-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .filter-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+    }
+    
+    .filter-tab {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 25px;
+        padding: 10px 20px;
+        color: white;
+        text-decoration: none;
+        transition: all 0.3s ease;
+    }
+    
+    .filter-tab:hover, .filter-tab.active {
+        background: #6A5ACD;
+        color: white;
+        text-decoration: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-10 mx-auto">
+            <div class="groups-container">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="text-white mb-0">👥 Grupos de Estudo</h2>
+                    <a href="{% url 'messaging:create_study_group' %}" class="create-group-btn">
+                        ➕ Criar Grupo
+                    </a>
+                </div>
+                
+                <!-- Filtros -->
+                <div class="filter-tabs">
+                    <a href="?filter=all" class="filter-tab {% if filter_type == 'all' %}active{% endif %}">
+                        📚 Todos
+                    </a>
+                    <a href="?filter=online" class="filter-tab {% if filter_type == 'online' %}active{% endif %}">
+                        💻 Online
+                    </a>
+                    <a href="?filter=presential" class="filter-tab {% if filter_type == 'presential' %}active{% endif %}">
+                        🏫 Presencial
+                    </a>
+                    <a href="?filter=hybrid" class="filter-tab {% if filter_type == 'hybrid' %}active{% endif %}">
+                        🔄 Híbrido
+                    </a>
+                </div>
+                
+                <!-- Busca -->
+                <form method="GET" class="mb-4">
+                    <div class="input-group">
+                        <input type="text" name="q" class="form-control" 
+                               placeholder="Buscar grupos por nome ou matéria..." 
+                               value="{{ search_query }}" 
+                               style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white;">
+                        <button class="btn btn-outline-light" type="submit">🔍</button>
+                    </div>
+                </form>
+                
+                <!-- Lista de Grupos -->
+                {% if groups %}
+                    {% for group in groups %}
+                        <div class="group-card">
+                            <div class="group-header">
+                                <div class="group-icon">
+                                    {% if group.subject == 'Python' %}🐍
+                                    {% elif group.subject == 'JavaScript' %}⚡
+                                    {% elif group.subject == 'Cálculo' %}📐
+                                    {% elif group.subject == 'Física' %}⚛️
+                                    {% elif 'Web' in group.subject %}🌐
+                                    {% elif 'Data' in group.subject %}📊
+                                    {% else %}📚
+                                    {% endif %}
+                                </div>
+                                <div class="group-info">
+                                    <h5>{{ group.name }}</h5>
+                                    <p class="group-meta">
+                                        {{ group.subject }} • 
+                                        {% if group.meeting_type == 'online' %}💻 Online
+                                        {% elif group.meeting_type == 'presential' %}🏫 Presencial
+                                        {% else %}🔄 Híbrido
+                                        {% endif %}
+                                        {% if group.university %} • {{ group.university }}{% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <p class="text-white-50 mb-3">{{ group.description|truncatechars:150 }}</p>
+                            
+                            <div class="group-stats">
+                                <div class="stat-item">
+                                    👥 <span class="stat-number">{{ group.members.count }}</span>/{{ group.max_members }} membros
+                                </div>
+                                <div class="stat-item">
+                                    👤 <span class="stat-number">{{ group.creator.nickname }}</span> (criador)
+                                </div>
+                                {% if group.semester %}
+                                    <div class="stat-item">
+                                        📅 <span class="stat-number">{{ group.semester }}</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-white-50">Criado em {{ group.created_at|date:"d/m/Y" }}</small>
+                                
+                                {% if user in group.members.all %}
+                                    <button class="btn joined-btn" disabled>
+                                        ✅ Membro
+                                    </button>
+                                {% elif group.members.count >= group.max_members %}
+                                    <button class="btn btn-secondary" disabled>
+                                        🚫 Lotado
+                                    </button>
+                                {% else %}
+                                    <form method="POST" action="{% url 'messaging:join_study_group' group.id %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="join-btn">
+                                            ➕ Participar
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                    
+                    <!-- Paginação -->
+                    {% if is_paginated %}
+                        <nav aria-label="Page navigation" class="mt-4">
+                            <ul class="pagination justify-content-center">
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if filter_type %}&filter={{ filter_type }}{% endif %}">Anterior</a>
+                                    </li>
+                                {% endif %}
+                                
+                                <li class="page-item active">
+                                    <span class="page-link">{{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+                                </li>
+                                
+                                {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if filter_type %}&filter={{ filter_type }}{% endif %}">Próxima</a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    {% endif %}
+                    
+                {% else %}
+                    <div class="text-center py-5">
+                        <div style="font-size: 5rem;">👥</div>
+                        <h3 class="text-white mb-3">Nenhum grupo encontrado</h3>
+                        <p class="text-white-50 mb-4">
+                            {% if search_query %}
+                                Não encontramos grupos com o termo "{{ search_query }}".
+                            {% else %}
+                                Seja o primeiro a criar um grupo de estudos!
+                            {% endif %}
+                        </p>
+                        <a href="{% url 'messaging:create_study_group' %}" class="create-group-btn">
+                            Criar primeiro grupo
+                        </a>
+                    </div>
+                {% endif %}
+                
+                <div class="mt-5 text-center">
+                    <a href="{% url 'messaging:student_social_feed' %}" class="btn btn-outline-light">
+                        🔙 Voltar ao Feed
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

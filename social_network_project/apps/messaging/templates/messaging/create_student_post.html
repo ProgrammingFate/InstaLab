@@ -1,0 +1,277 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Criar Post - InstaLab{% endblock %}
+
+{% block extra_css %}
+<style>
+    .create-post-container {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 40px;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .form-group {
+        margin-bottom: 25px;
+    }
+    
+    .form-label {
+        color: white;
+        font-weight: 500;
+        margin-bottom: 10px;
+        display: block;
+    }
+    
+    .form-control {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        border-radius: 10px;
+        padding: 12px 15px;
+    }
+    
+    .form-control:focus {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: #6A5ACD;
+        box-shadow: 0 0 0 0.2rem rgba(106, 90, 205, 0.25);
+        color: white;
+    }
+    
+    .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .form-select {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        border-radius: 10px;
+    }
+    
+    .form-select option {
+        background: #2c2c2c;
+        color: white;
+    }
+    
+    .post-type-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .post-type-card {
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .post-type-card:hover {
+        border-color: #6A5ACD;
+        transform: translateY(-3px);
+    }
+    
+    .post-type-card.selected {
+        border-color: #6A5ACD;
+        background: rgba(106, 90, 205, 0.2);
+    }
+    
+    .post-type-icon {
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+    
+    .post-type-title {
+        color: white;
+        font-weight: 500;
+        margin-bottom: 5px;
+    }
+    
+    .post-type-desc {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 14px;
+    }
+    
+    .conditional-fields {
+        display: none;
+        margin-top: 20px;
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+    }
+    
+    .submit-btn {
+        background: linear-gradient(45deg, #6A5ACD, #9370DB);
+        border: none;
+        border-radius: 25px;
+        padding: 15px 40px;
+        color: white;
+        font-weight: 500;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+    
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(106, 90, 205, 0.4);
+    }
+    
+    .cancel-btn {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 25px;
+        padding: 15px 40px;
+        color: white;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+        transition: all 0.3s ease;
+        width: 100%;
+        margin-top: 15px;
+    }
+    
+    .cancel-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        text-decoration: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="create-post-container">
+        <h2 class="text-white mb-4 text-center">✍️ Criar Novo Post</h2>
+        
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <!-- Título -->
+            <div class="form-group">
+                <label for="title" class="form-label">📝 Título do Post</label>
+                <input type="text" class="form-control" name="title" id="title" 
+                       placeholder="Ex: Preciso de ajuda com Python..." required>
+            </div>
+            
+            <!-- Tipo de Post -->
+            <div class="form-group">
+                <label class="form-label">🎯 Tipo de Post</label>
+                <div class="post-type-cards">
+                    <div class="post-type-card" data-type="help">
+                        <div class="post-type-icon">🆘</div>
+                        <div class="post-type-title">Pedir Ajuda</div>
+                        <div class="post-type-desc">Precisa de ajuda com algum assunto?</div>
+                    </div>
+                    <div class="post-type-card" data-type="achievement">
+                        <div class="post-type-icon">🏆</div>
+                        <div class="post-type-title">Conquista</div>
+                        <div class="post-type-desc">Compartilhe suas conquistas!</div>
+                    </div>
+                    <div class="post-type-card" data-type="study_group">
+                        <div class="post-type-icon">👥</div>
+                        <div class="post-type-title">Grupo de Estudos</div>
+                        <div class="post-type-desc">Organize um grupo de estudos</div>
+                    </div>
+                    <div class="post-type-card" data-type="networking">
+                        <div class="post-type-icon">🤝</div>
+                        <div class="post-type-title">Networking</div>
+                        <div class="post-type-desc">Conecte-se com outros estudantes</div>
+                    </div>
+                    <div class="post-type-card" data-type="discussion">
+                        <div class="post-type-icon">💭</div>
+                        <div class="post-type-title">Discussão</div>
+                        <div class="post-type-desc">Inicie uma discussão interessante</div>
+                    </div>
+                </div>
+                <input type="hidden" name="post_type" id="post_type" required>
+            </div>
+            
+            <!-- Conteúdo -->
+            <div class="form-group">
+                <label for="content" class="form-label">📄 Conteúdo</label>
+                <textarea class="form-control" name="content" id="content" rows="6" 
+                          placeholder="Descreva seu post em detalhes..." required></textarea>
+            </div>
+            
+            <!-- Tags -->
+            <div class="form-group">
+                <label for="tags" class="form-label">🏷️ Tags (separadas por vírgula)</label>
+                <input type="text" class="form-control" name="tags" id="tags" 
+                       placeholder="Ex: python, programação, help">
+                <small class="text-white-50">Use tags para facilitar a busca do seu post</small>
+            </div>
+            
+            <!-- Imagem -->
+            <div class="form-group">
+                <label for="image" class="form-label">🖼️ Imagem (opcional)</label>
+                <input type="file" class="form-control" name="image" id="image" accept="image/*">
+            </div>
+            
+            <!-- Campos condicionais para Grupo de Estudos -->
+            <div id="study-group-fields" class="conditional-fields">
+                <h5 class="text-white mb-3">📚 Detalhes do Grupo de Estudos</h5>
+                
+                <div class="form-group">
+                    <label for="study_subject" class="form-label">Matéria/Assunto</label>
+                    <input type="text" class="form-control" name="study_subject" id="study_subject" 
+                           placeholder="Ex: Cálculo I, Python, Algoritmos...">
+                </div>
+                
+                <div class="form-group">
+                    <label for="max_participants" class="form-label">Máximo de Participantes</label>
+                    <input type="number" class="form-control" name="max_participants" id="max_participants" 
+                           min="2" max="50" placeholder="Ex: 8">
+                </div>
+            </div>
+            
+            <!-- Botões -->
+            <div class="form-group">
+                <button type="submit" class="submit-btn">
+                    🚀 Publicar Post
+                </button>
+                <a href="{% url 'messaging:student_social_feed' %}" class="cancel-btn">
+                    ❌ Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const typeCards = document.querySelectorAll('.post-type-card');
+    const postTypeInput = document.getElementById('post_type');
+    const studyGroupFields = document.getElementById('study-group-fields');
+    
+    typeCards.forEach(card => {
+        card.addEventListener('click', function() {
+            // Remove seleção anterior
+            typeCards.forEach(c => c.classList.remove('selected'));
+            
+            // Adiciona seleção atual
+            this.classList.add('selected');
+            
+            // Define valor do tipo
+            const type = this.dataset.type;
+            postTypeInput.value = type;
+            
+            // Mostra/esconde campos condicionais
+            if (type === 'study_group') {
+                studyGroupFields.style.display = 'block';
+            } else {
+                studyGroupFields.style.display = 'none';
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

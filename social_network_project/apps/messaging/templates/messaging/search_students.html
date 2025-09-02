@@ -1,0 +1,347 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Buscar Estudantes - InstaLab{% endblock %}
+
+{% block extra_css %}
+<style>
+    .search-container {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 30px;
+        margin-bottom: 30px;
+    }
+    
+    .student-card {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 15px;
+        padding: 25px;
+        margin-bottom: 20px;
+        transition: all 0.3s ease;
+    }
+    
+    .student-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(106, 90, 205, 0.3);
+    }
+    
+    .student-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+    
+    .student-avatar {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(45deg, #6A5ACD, #9370DB);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 20px;
+        color: white;
+        font-size: 24px;
+        font-weight: bold;
+    }
+    
+    .student-info h5 {
+        color: white;
+        margin: 0;
+        font-weight: 600;
+    }
+    
+    .student-meta {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 14px;
+        margin: 5px 0 0 0;
+    }
+    
+    .student-skills {
+        margin: 15px 0;
+    }
+    
+    .skill-tag {
+        background: rgba(106, 90, 205, 0.3);
+        color: white;
+        padding: 5px 12px;
+        border-radius: 15px;
+        font-size: 12px;
+        margin-right: 8px;
+        margin-bottom: 5px;
+        display: inline-block;
+    }
+    
+    .student-stats {
+        display: flex;
+        gap: 20px;
+        margin: 15px 0;
+    }
+    
+    .stat-item {
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 14px;
+    }
+    
+    .stat-number {
+        color: #6A5ACD;
+        font-weight: bold;
+    }
+    
+    .connect-btn {
+        background: linear-gradient(45deg, #6A5ACD, #9370DB);
+        border: none;
+        border-radius: 25px;
+        padding: 8px 20px;
+        color: white;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+    
+    .connect-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(106, 90, 205, 0.4);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .connected-btn {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .filter-section {
+        margin-bottom: 30px;
+    }
+    
+    .filter-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+    }
+    
+    .filter-tab {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 25px;
+        padding: 10px 20px;
+        color: white;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        font-size: 14px;
+    }
+    
+    .filter-tab:hover, .filter-tab.active {
+        background: #6A5ACD;
+        color: white;
+        text-decoration: none;
+    }
+    
+    .online-indicator {
+        width: 12px;
+        height: 12px;
+        background: #4CAF50;
+        border-radius: 50%;
+        display: inline-block;
+        margin-left: 8px;
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-10 mx-auto">
+            <div class="search-container">
+                <h2 class="text-white mb-4">🔍 Buscar Estudantes</h2>
+                
+                <!-- Filtros -->
+                <div class="filter-section">
+                    <div class="filter-tabs">
+                        <a href="?filter=all" class="filter-tab {% if filter_type == 'all' %}active{% endif %}">
+                            👥 Todos
+                        </a>
+                        <a href="?filter=online" class="filter-tab {% if filter_type == 'online' %}active{% endif %}">
+                            🟢 Online
+                        </a>
+                        <a href="?filter=recent" class="filter-tab {% if filter_type == 'recent' %}active{% endif %}">
+                            🆕 Recentes
+                        </a>
+                        <a href="?filter=active" class="filter-tab {% if filter_type == 'active' %}active{% endif %}">
+                            ⚡ Ativos
+                        </a>
+                    </div>
+                    
+                    <!-- Busca -->
+                    <form method="GET" class="mb-3">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <input type="text" name="q" class="form-control" 
+                                       placeholder="Buscar por nome, área ou interesse..." 
+                                       value="{{ search_query }}" 
+                                       style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white;">
+                            </div>
+                            <div class="col-md-4">
+                                <select name="area" class="form-select" 
+                                        style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white;">
+                                    <option value="">Todas as áreas</option>
+                                    <option value="frontend" {% if area_filter == 'frontend' %}selected{% endif %}>Frontend</option>
+                                    <option value="backend" {% if area_filter == 'backend' %}selected{% endif %}>Backend</option>
+                                    <option value="fullstack" {% if area_filter == 'fullstack' %}selected{% endif %}>Full Stack</option>
+                                    <option value="mobile" {% if area_filter == 'mobile' %}selected{% endif %}>Mobile</option>
+                                    <option value="data" {% if area_filter == 'data' %}selected{% endif %}>Data Science</option>
+                                    <option value="design" {% if area_filter == 'design' %}selected{% endif %}>Design</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-outline-light w-100">🔍</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Lista de Estudantes -->
+                {% if students %}
+                    <div class="mb-3">
+                        <small class="text-white-50">{{ students|length }} estudante{{ students|length|pluralize }} encontrado{{ students|length|pluralize }}</small>
+                    </div>
+                    
+                    {% for student in students %}
+                        <div class="student-card">
+                            <div class="student-header">
+                                <div class="student-avatar">
+                                    {% if student.profile_picture %}
+                                        <img src="{{ student.profile_picture.url }}" alt="{{ student.nickname }}" 
+                                             style="width: 56px; height: 56px; border-radius: 50%; object-fit: cover;">
+                                    {% else %}
+                                        {{ student.nickname|first|upper }}
+                                    {% endif %}
+                                </div>
+                                <div class="student-info">
+                                    <h5>
+                                        {{ student.nickname|default:student.username }}
+                                        {% if student.is_online %}
+                                            <span class="online-indicator" title="Online agora"></span>
+                                        {% endif %}
+                                    </h5>
+                                    <p class="student-meta">
+                                        {% if student.course %}{{ student.course }}{% endif %}
+                                        {% if student.university %} • {{ student.university }}{% endif %}
+                                        {% if student.semester %} • {{ student.semester }}º sem{% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            {% if student.bio %}
+                                <p class="text-white-50 mb-3">{{ student.bio|truncatechars:120 }}</p>
+                            {% endif %}
+                            
+                            <!-- Skills/Interesses -->
+                            {% if student.skills %}
+                                <div class="student-skills">
+                                    {% for skill in student.skills_list %}
+                                        <span class="skill-tag">{{ skill }}</span>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            
+                            <!-- Estatísticas -->
+                            <div class="student-stats">
+                                <div class="stat-item">
+                                    📝 <span class="stat-number">{{ student.posts_count|default:0 }}</span> posts
+                                </div>
+                                <div class="stat-item">
+                                    👥 <span class="stat-number">{{ student.connections_count|default:0 }}</span> conexões
+                                </div>
+                                <div class="stat-item">
+                                    📚 <span class="stat-number">{{ student.groups_count|default:0 }}</span> grupos
+                                </div>
+                                <div class="stat-item">
+                                    📅 Desde {{ student.date_joined|date:"M/Y" }}
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-white-50">
+                                    Última atividade: {{ student.last_activity|default:student.last_login|timesince }} atrás
+                                </small>
+                                
+                                {% if student != user %}
+                                    {% if student in user.connections.all %}
+                                        <span class="connected-btn">✅ Conectado</span>
+                                    {% else %}
+                                        <form method="POST" action="{% url 'messaging:send_connection_request' student.id %}" style="display: inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="connect-btn">
+                                                🤝 Conectar
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                    
+                    <!-- Paginação -->
+                    {% if is_paginated %}
+                        <nav aria-label="Page navigation" class="mt-4">
+                            <ul class="pagination justify-content-center">
+                                {% if page_obj.has_previous %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if filter_type %}&filter={{ filter_type }}{% endif %}">Anterior</a>
+                                    </li>
+                                {% endif %}
+                                
+                                <li class="page-item active">
+                                    <span class="page-link">{{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+                                </li>
+                                
+                                {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if filter_type %}&filter={{ filter_type }}{% endif %}">Próxima</a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    {% endif %}
+                    
+                {% else %}
+                    <div class="text-center py-5">
+                        <div style="font-size: 5rem;">👥</div>
+                        <h3 class="text-white mb-3">Nenhum estudante encontrado</h3>
+                        <p class="text-white-50 mb-4">
+                            {% if search_query %}
+                                Não encontramos estudantes com o termo "{{ search_query }}".
+                            {% else %}
+                                Ainda não há outros estudantes cadastrados.
+                            {% endif %}
+                        </p>
+                        <a href="{% url 'messaging:student_social_feed' %}" class="btn btn-outline-light">
+                            🔙 Voltar ao Feed
+                        </a>
+                    </div>
+                {% endif %}
+                
+                <div class="mt-5 text-center">
+                    <a href="{% url 'messaging:student_social_feed' %}" class="btn btn-outline-light">
+                        🔙 Voltar ao Feed Social
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

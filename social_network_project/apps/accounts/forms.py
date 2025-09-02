@@ -119,6 +119,99 @@ class UserRegistrationForm(forms.ModelForm):
             user.save()
         return user
 
+class UserEditForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'user_type', 'company_name', 'company_description', 
+                 'company_instagram', 'course', 'university', 'semester', 'bio', 'avatar']
+        widgets = {
+            'username': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Seu nome de usuário'
+            }),
+            'email': forms.EmailInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'seu@email.com'
+            }),
+            'user_type': forms.Select(attrs={
+                'class': 'form-control'
+            }),
+            'company_name': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Nome da sua empresa/organização'
+            }),
+            'company_description': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 5,
+                'placeholder': 'Descreva sua empresa júnior'
+            }),
+            'company_instagram': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': '@suaempresajr (opcional)'
+            }),
+            'course': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ex: Ciência da Computação'
+            }),
+            'university': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ex: USP, UFMG, PUC...'
+            }),
+            'semester': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Ex: 5º semestre'
+            }),
+            'bio': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Conte um pouco sobre você...'
+            }),
+            'avatar': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*'
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Labels customizados
+        self.fields['company_name'].label = 'Nome da Empresa Júnior'
+        self.fields['company_description'].label = 'Sobre a Empresa Júnior'
+        self.fields['company_instagram'].label = 'Instagram da Empresa (opcional)'
+        self.fields['course'].label = 'Curso'
+        self.fields['university'].label = 'Universidade/Faculdade'
+        self.fields['semester'].label = 'Período/Semestre'
+        self.fields['bio'].label = 'Biografia'
+        self.fields['avatar'].label = 'Foto de Perfil'
+        
+        # Campos condicionais baseados no tipo de usuário
+        self.fields['company_name'].required = False
+        self.fields['company_description'].required = False
+        self.fields['company_instagram'].required = False
+        self.fields['course'].required = False
+        self.fields['university'].required = False
+        self.fields['semester'].required = False
+        self.fields['bio'].required = False
+        self.fields['avatar'].required = False
+
+    def clean(self):
+        cleaned_data = super().clean()
+        user_type = cleaned_data.get('user_type')
+        
+        # Validações específicas para empresa
+        if user_type == 'company':
+            if not cleaned_data.get('company_name'):
+                raise forms.ValidationError('Nome da empresa é obrigatório para empresas.')
+        
+        # Validações específicas para estudante
+        elif user_type == 'student':
+            if not cleaned_data.get('course'):
+                raise forms.ValidationError('Curso é obrigatório para estudantes.')
+            if not cleaned_data.get('university'):
+                raise forms.ValidationError('Universidade é obrigatória para estudantes.')
+        
+        return cleaned_data
+
 class UserLoginForm(AuthenticationForm):
     username = forms.CharField(label='Usuário', widget=forms.TextInput(attrs={
         'class': 'form-control',

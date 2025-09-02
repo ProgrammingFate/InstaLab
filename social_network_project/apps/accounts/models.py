@@ -12,6 +12,8 @@ class CustomUser(AbstractUser):
     
     nickname = models.CharField(max_length=30, unique=True)
     profile_picture = models.ImageField(upload_to='profiles/', null=True, blank=True)
+    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
+    bio = models.TextField(blank=True, null=True)
     user_type = models.CharField(max_length=10, choices=USER_TYPES, default='student')
     
     # Campos específicos para empresas/organizações

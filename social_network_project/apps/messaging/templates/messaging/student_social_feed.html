@@ -1,0 +1,729 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Área Social - Estudantes{% endblock %}
+
+{% block content %}
+<div class="student-social-page">
+    <div class="container">
+        <!-- Header da Área Social -->
+        <div class="social-header">
+            <div class="header-content">
+                <h1>
+                    <i class="fas fa-users"></i>
+                    Área Social dos Estudantes
+                </h1>
+                <p>Conecte-se, compartilhe conhecimento e cresça junto com outros estudantes!</p>
+            </div>
+            <div class="header-actions">
+                <a href="{% url 'messaging:create_student_post' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i>
+                    Criar Post
+                </a>
+                <a href="{% url 'messaging:study_groups_list' %}" class="btn btn-secondary">
+                    <i class="fas fa-graduation-cap"></i>
+                    Grupos de Estudo
+                </a>
+                <a href="{% url 'messaging:search_students' %}" class="btn btn-outline">
+                    <i class="fas fa-search"></i>
+                    Buscar Estudantes
+                </a>
+            </div>
+        </div>
+
+        <!-- Estatísticas Rápidas -->
+        <div class="quick-stats">
+            <div class="stat-item">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-number">{{ total_students }}</div>
+                    <div class="stat-label">Estudantes</div>
+                </div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon">
+                    <i class="fas fa-comments"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-number">{{ total_posts }}</div>
+                    <div class="stat-label">Posts</div>
+                </div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-number">{{ total_study_groups }}</div>
+                    <div class="stat-label">Grupos de Estudo</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filtros e Busca -->
+        <div class="filters-section">
+            <form method="GET" class="filters-form">
+                <div class="filter-group">
+                    <select name="type" class="form-select" onchange="this.form.submit()">
+                        <option value="all" {% if post_type == 'all' %}selected{% endif %}>Todos os posts</option>
+                        <option value="help" {% if post_type == 'help' %}selected{% endif %}>Pedidos de Ajuda</option>
+                        <option value="share" {% if post_type == 'share' %}selected{% endif %}>Compartilhamentos</option>
+                        <option value="project" {% if post_type == 'project' %}selected{% endif %}>Projetos Pessoais</option>
+                        <option value="achievement" {% if post_type == 'achievement' %}selected{% endif %}>Conquistas</option>
+                        <option value="study_group" {% if post_type == 'study_group' %}selected{% endif %}>Grupos de Estudos</option>
+                        <option value="networking" {% if post_type == 'networking' %}selected{% endif %}>Networking</option>
+                        <option value="discussion" {% if post_type == 'discussion' %}selected{% endif %}>Discussões</option>
+                    </select>
+                </div>
+                <div class="search-group">
+                    <input type="text" 
+                           name="q" 
+                           value="{{ search_query }}" 
+                           placeholder="Buscar posts..."
+                           class="form-control">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Feed de Posts -->
+        <div class="posts-feed">
+            {% for post in page_obj %}
+            <div class="post-card" data-post-id="{{ post.id }}">
+                <div class="post-header">
+                    <div class="author-info">
+                        <div class="author-avatar">
+                            {% if post.author.profile_picture %}
+                                <img src="{{ post.author.profile_picture.url }}" alt="{{ post.author.nickname }}">
+                            {% else %}
+                                {{ post.author.nickname|first|upper|default:post.author.username|first|upper }}
+                            {% endif %}
+                        </div>
+                        <div class="author-details">
+                            <h4>{{ post.author.nickname|default:post.author.username }}</h4>
+                            <div class="post-meta">
+                                <span class="post-type post-type-{{ post.post_type }}">
+                                    {% if post.post_type == 'help' %}💡 Pedido de Ajuda
+                                    {% elif post.post_type == 'share' %}📤 Compartilhamento
+                                    {% elif post.post_type == 'project' %}🚀 Projeto Pessoal
+                                    {% elif post.post_type == 'achievement' %}🏆 Conquista
+                                    {% elif post.post_type == 'study_group' %}📚 Grupo de Estudos
+                                    {% elif post.post_type == 'networking' %}🤝 Networking
+                                    {% elif post.post_type == 'discussion' %}💭 Discussão
+                                    {% endif %}
+                                </span>
+                                <span class="post-time">{{ post.created_at|timesince }} atrás</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="post-content">
+                    <h3>{{ post.title }}</h3>
+                    <p>{{ post.content|linebreaks }}</p>
+                    
+                    {% if post.image %}
+                    <div class="post-image">
+                        <img src="{{ post.image.url }}" alt="{{ post.title }}">
+                    </div>
+                    {% endif %}
+
+                    {% if post.tag_list %}
+                    <div class="post-tags">
+                        {% for tag in post.tag_list %}
+                        <span class="tag">#{{ tag }}</span>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    {% if post.study_subject and post.post_type == 'study_group' %}
+                    <div class="study-info">
+                        <strong>📚 Matéria:</strong> {{ post.study_subject }}
+                        {% if post.max_participants %}
+                        <strong>👥 Máx. Participantes:</strong> {{ post.max_participants }}
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="post-actions">
+                    <button class="action-btn like-btn" onclick="toggleLike({{ post.id }})">
+                        <i class="fas fa-heart"></i>
+                        <span class="likes-count">{{ post.likes_count }}</span>
+                    </button>
+                    <a href="{% url 'messaging:student_post_detail' post.id %}" class="action-btn">
+                        <i class="fas fa-comment"></i>
+                        <span>{{ post.comments_count }}</span>
+                    </a>
+                    <button class="action-btn share-btn" onclick="sharePost({{ post.id }})">
+                        <i class="fas fa-share"></i>
+                        Compartilhar
+                    </button>
+                </div>
+            </div>
+            {% empty %}
+            <div class="no-posts">
+                <div class="empty-state">
+                    <i class="fas fa-comments"></i>
+                    <h3>Nenhum post encontrado</h3>
+                    <p>{% if search_query or post_type != 'all' %}
+                        Tente ajustar os filtros ou fazer uma nova busca.
+                    {% else %}
+                        Seja o primeiro a compartilhar algo na comunidade!
+                    {% endif %}</p>
+                    <a href="{% url 'messaging:create_student_post' %}" class="btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Criar Primeiro Post
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Paginação -->
+        {% if page_obj.has_other_pages %}
+        <div class="pagination-wrapper">
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                    <a href="?page={{ page_obj.previous_page_number }}{% if post_type != 'all' %}&type={{ post_type }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}" class="page-link">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <span class="page-link current">{{ num }}</span>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <a href="?page={{ num }}{% if post_type != 'all' %}&type={{ post_type }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}" class="page-link">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <a href="?page={{ page_obj.next_page_number }}{% if post_type != 'all' %}&type={{ post_type }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}" class="page-link">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.student-social-page {
+    padding: 40px 0 80px;
+    min-height: 100vh;
+}
+
+.social-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 40px;
+    padding: 30px;
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.header-content h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.header-content p {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    margin: 0;
+}
+
+.header-actions {
+    display: flex;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.quick-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+    animation: fadeInUp 0.6s ease-out 0.2s both;
+}
+
+.stat-item {
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: transform 0.3s ease;
+}
+
+.stat-item:hover {
+    transform: translateY(-2px);
+}
+
+.stat-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    background: linear-gradient(45deg, var(--primary), var(--primary-light));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+    flex-shrink: 0;
+}
+
+.stat-number {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-top: 4px;
+}
+
+.filters-section {
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 30px;
+    animation: fadeInUp 0.6s ease-out 0.4s both;
+}
+
+.filters-form {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+.filter-group {
+    flex: 0 0 250px;
+}
+
+.search-group {
+    display: flex;
+    gap: 10px;
+    flex: 1;
+}
+
+.search-group input {
+    flex: 1;
+}
+
+.posts-feed {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    animation: fadeInUp 0.6s ease-out 0.6s both;
+}
+
+.post-card {
+    background: var(--glass);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 24px;
+    transition: all 0.3s ease;
+}
+
+.post-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px var(--shadow);
+}
+
+.post-header {
+    margin-bottom: 20px;
+}
+
+.author-info {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.author-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, var(--primary), var(--primary-light));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+    font-weight: bold;
+    overflow: hidden;
+}
+
+.author-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.author-details h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+}
+
+.post-meta {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    font-size: 0.85rem;
+}
+
+.post-type {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-weight: 500;
+}
+
+.post-type-help { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+.post-type-share { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+.post-type-project { background: rgba(168, 85, 247, 0.1); color: #a855f7; }
+.post-type-achievement { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
+.post-type-study_group { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+.post-type-networking { background: rgba(14, 165, 233, 0.1); color: #0ea5e9; }
+.post-type-discussion { background: rgba(156, 163, 175, 0.1); color: #9ca3af; }
+
+.post-time {
+    color: var(--text-secondary);
+}
+
+.post-content h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+}
+
+.post-content p {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 16px;
+}
+
+.post-image {
+    margin: 16px 0;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.post-image img {
+    width: 100%;
+    height: auto;
+    max-height: 400px;
+    object-fit: cover;
+}
+
+.post-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 16px 0;
+}
+
+.tag {
+    background: rgba(225, 48, 108, 0.1);
+    color: var(--primary);
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.study-info {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 12px;
+    margin: 16px 0;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.study-info strong {
+    color: var(--text-primary);
+    margin-right: 8px;
+}
+
+.post-actions {
+    display: flex;
+    gap: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+    margin-top: 16px;
+}
+
+.action-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.action-btn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--primary);
+    color: var(--primary);
+    text-decoration: none;
+}
+
+.like-btn.liked {
+    background: rgba(225, 48, 108, 0.1);
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.no-posts {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.empty-state i {
+    font-size: 4rem;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+}
+
+.empty-state h3 {
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+}
+
+.empty-state p {
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+    line-height: 1.6;
+}
+
+.btn {
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, var(--primary), var(--primary-light));
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.1);
+    text-decoration: none;
+    color: white;
+}
+
+.btn-secondary {
+    background: var(--glass);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+}
+
+.btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+    text-decoration: none;
+    color: var(--text-primary);
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--primary);
+    border: 1px solid var(--primary);
+}
+
+.btn-outline:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateY(-1px);
+    text-decoration: none;
+}
+
+.pagination-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: 40px;
+}
+
+.pagination {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.page-link {
+    padding: 10px 16px;
+    background: var(--glass);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.page-link:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-1px);
+    text-decoration: none;
+    color: var(--text-primary);
+}
+
+.page-link.current {
+    background: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .social-header {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .header-actions {
+        width: 100%;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .filters-form {
+        flex-direction: column;
+        gap: 16px;
+    }
+    
+    .filter-group {
+        flex: none;
+        width: 100%;
+    }
+    
+    .quick-stats {
+        grid-template-columns: 1fr;
+    }
+    
+    .post-actions {
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+    
+    .author-info {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+
+/* Animações */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+</style>
+
+<script>
+function toggleLike(postId) {
+    fetch(`/messaging/social/post/${postId}/like/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+            'Content-Type': 'application/json',
+        },
+    })
+    .then(response => response.json())
+    .then(data => {
+        const likeBtn = document.querySelector(`[data-post-id="${postId}"] .like-btn`);
+        const likesCount = likeBtn.querySelector('.likes-count');
+        
+        if (data.liked) {
+            likeBtn.classList.add('liked');
+        } else {
+            likeBtn.classList.remove('liked');
+        }
+        
+        likesCount.textContent = data.likes_count;
+    })
+    .catch(error => {
+        console.error('Erro ao curtir post:', error);
+    });
+}
+
+function sharePost(postId) {
+    if (navigator.share) {
+        navigator.share({
+            title: 'Confira este post!',
+            url: window.location.origin + `/messaging/social/post/${postId}/`
+        });
+    } else {
+        // Fallback: copiar link
+        const url = window.location.origin + `/messaging/social/post/${postId}/`;
+        navigator.clipboard.writeText(url).then(() => {
+            alert('Link copiado para a área de transferência!');
+        });
+    }
+}
+
+// Animações ao carregar a página
+document.addEventListener('DOMContentLoaded', function() {
+    const posts = document.querySelectorAll('.post-card');
+    posts.forEach((post, index) => {
+        post.style.opacity = '0';
+        post.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            post.style.transition = 'all 0.6s ease-out';
+            post.style.opacity = '1';
+            post.style.transform = 'translateY(0)';
+        }, 800 + (index * 100));
+    });
+});
+</script>
+{% endblock %}

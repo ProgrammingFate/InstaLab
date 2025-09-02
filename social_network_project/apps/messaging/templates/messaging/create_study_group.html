@@ -1,0 +1,241 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Criar Grupo de Estudos - InstaLab{% endblock %}
+
+{% block extra_css %}
+<style>
+    .create-group-container {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 40px;
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    .form-group {
+        margin-bottom: 25px;
+    }
+    
+    .form-label {
+        color: white;
+        font-weight: 500;
+        margin-bottom: 10px;
+        display: block;
+    }
+    
+    .form-control, .form-select {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        border-radius: 10px;
+        padding: 12px 15px;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: #6A5ACD;
+        box-shadow: 0 0 0 0.2rem rgba(106, 90, 205, 0.25);
+        color: white;
+    }
+    
+    .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.5);
+    }
+    
+    .form-select option {
+        background: #2c2c2c;
+        color: white;
+    }
+    
+    .meeting-type-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .meeting-type-card {
+        background: rgba(255, 255, 255, 0.1);
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 15px;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .meeting-type-card:hover {
+        border-color: #6A5ACD;
+        transform: translateY(-3px);
+    }
+    
+    .meeting-type-card.selected {
+        border-color: #6A5ACD;
+        background: rgba(106, 90, 205, 0.2);
+    }
+    
+    .meeting-icon {
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+    
+    .meeting-title {
+        color: white;
+        font-weight: 500;
+        margin-bottom: 5px;
+    }
+    
+    .meeting-desc {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 14px;
+    }
+    
+    .submit-btn {
+        background: linear-gradient(45deg, #6A5ACD, #9370DB);
+        border: none;
+        border-radius: 25px;
+        padding: 15px 40px;
+        color: white;
+        font-weight: 500;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+    
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(106, 90, 205, 0.4);
+    }
+    
+    .cancel-btn {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 25px;
+        padding: 15px 40px;
+        color: white;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+        transition: all 0.3s ease;
+        width: 100%;
+        margin-top: 15px;
+    }
+    
+    .cancel-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        text-decoration: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="create-group-container">
+        <h2 class="text-white mb-4 text-center">👥 Criar Grupo de Estudos</h2>
+        
+        <form method="POST">
+            {% csrf_token %}
+            
+            <!-- Nome do Grupo -->
+            <div class="form-group">
+                <label for="name" class="form-label">📚 Nome do Grupo</label>
+                <input type="text" class="form-control" name="name" id="name" 
+                       placeholder="Ex: Python para Iniciantes" required>
+            </div>
+            
+            <!-- Matéria/Assunto -->
+            <div class="form-group">
+                <label for="subject" class="form-label">📖 Matéria/Assunto</label>
+                <input type="text" class="form-control" name="subject" id="subject" 
+                       placeholder="Ex: Programação Python, Cálculo I, Física..." required>
+            </div>
+            
+            <!-- Descrição -->
+            <div class="form-group">
+                <label for="description" class="form-label">📝 Descrição</label>
+                <textarea class="form-control" name="description" id="description" rows="4" 
+                          placeholder="Descreva os objetivos do grupo, metodologia, cronograma..." required></textarea>
+            </div>
+            
+            <!-- Tipo de Encontro -->
+            <div class="form-group">
+                <label class="form-label">🌐 Tipo de Encontro</label>
+                <div class="meeting-type-cards">
+                    <div class="meeting-type-card" data-type="online">
+                        <div class="meeting-icon">💻</div>
+                        <div class="meeting-title">Online</div>
+                        <div class="meeting-desc">Reuniões virtuais</div>
+                    </div>
+                    <div class="meeting-type-card" data-type="presential">
+                        <div class="meeting-icon">🏫</div>
+                        <div class="meeting-title">Presencial</div>
+                        <div class="meeting-desc">Encontros físicos</div>
+                    </div>
+                    <div class="meeting-type-card" data-type="hybrid">
+                        <div class="meeting-icon">🔄</div>
+                        <div class="meeting-title">Híbrido</div>
+                        <div class="meeting-desc">Misto: online + presencial</div>
+                    </div>
+                </div>
+                <input type="hidden" name="meeting_type" id="meeting_type" required>
+            </div>
+            
+            <!-- Máximo de Membros -->
+            <div class="form-group">
+                <label for="max_members" class="form-label">👥 Máximo de Membros</label>
+                <input type="number" class="form-control" name="max_members" id="max_members" 
+                       min="2" max="50" value="10" required>
+                <small class="text-white-50">Entre 2 e 50 membros</small>
+            </div>
+            
+            <!-- Universidade (opcional) -->
+            <div class="form-group">
+                <label for="university" class="form-label">🎓 Universidade (opcional)</label>
+                <input type="text" class="form-control" name="university" id="university" 
+                       placeholder="Ex: USP, UNESP, UNIFESP...">
+            </div>
+            
+            <!-- Semestre (opcional) -->
+            <div class="form-group">
+                <label for="semester" class="form-label">📅 Semestre/Período (opcional)</label>
+                <input type="text" class="form-control" name="semester" id="semester" 
+                       placeholder="Ex: 2024.2, 3º período...">
+            </div>
+            
+            <!-- Botões -->
+            <div class="form-group">
+                <button type="submit" class="submit-btn">
+                    🚀 Criar Grupo
+                </button>
+                <a href="{% url 'messaging:study_groups_list' %}" class="cancel-btn">
+                    ❌ Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const typeCards = document.querySelectorAll('.meeting-type-card');
+    const meetingTypeInput = document.getElementById('meeting_type');
+    
+    typeCards.forEach(card => {
+        card.addEventListener('click', function() {
+            // Remove seleção anterior
+            typeCards.forEach(c => c.classList.remove('selected'));
+            
+            // Adiciona seleção atual
+            this.classList.add('selected');
+            
+            // Define valor do tipo
+            meetingTypeInput.value = this.dataset.type;
+        });
+    });
+});
+</script>
+{% endblock %}
