@@ -21,11 +21,18 @@ body {
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden !important;
     margin: 0 !important;
-    padding: 80px 0 0 0 !important; /* Padding-top para compensar header fixo */
+    padding: 100px 0 0 0 !important; /* Aumentado para evitar corte do header */
     width: 100% !important;
     position: relative !important;
     min-width: 100% !important;
     max-width: 100% !important;
+}
+
+/* Main content styling */
+.main-content {
+    min-height: calc(100vh - 200px); /* Garante altura mínima */
+    position: relative;
+    z-index: 1;
 }
 
 /* IMPORTANTE: Forçar header full width em qualquer zoom */
@@ -373,9 +380,10 @@ body {
 
 /* Hero Section */
 .hero-section {
-    padding: 100px 0;
+    padding: 120px 0 80px 0; /* Mais espaço superior e inferior */
     background: radial-gradient(ellipse at center, rgba(225, 48, 108, 0.1) 0%, transparent 70%);
     position: relative;
+    min-height: 80vh; /* Garante altura mínima adequada */
 }
 
 .hero-section::before {
@@ -566,7 +574,7 @@ body {
 
 /* Features Section */
 .features-section {
-    padding: 100px 0;
+    padding: 80px 0; /* Padding mais balanceado */
     background: rgba(0, 0, 0, 0.1);
     position: relative;
 }
@@ -693,7 +701,7 @@ body {
 
 /* CTA Section */
 .cta-section {
-    padding: 100px 0;
+    padding: 80px 0; /* Padding mais balanceado */
     text-align: center;
     position: relative;
 }
@@ -719,7 +727,7 @@ body {
 /* Forms */
 .auth-container, .profile-container {
     max-width: 480px;
-    margin: 60px auto;
+    margin: 80px auto 40px auto; /* Mais margem superior, menos inferior */
     background: var(--glass);
     backdrop-filter: blur(20px);
     border: 1px solid var(--border);
@@ -1003,7 +1011,7 @@ body {
 /* Footer - Largura total */
 footer {
     width: 100% !important;
-    margin: 0 !important;
+    margin: 40px 0 0 0 !important; /* Margem superior para separar do conteúdo */
     padding: 0 !important;
     background: rgba(0, 0, 0, 0.2) !important;
     border-top: 1px solid var(--border) !important;
@@ -1318,7 +1326,7 @@ html {
     
     /* Auth container responsivo */
     .auth-container, .profile-container {
-        margin: 40px 20px;
+        margin: 60px 20px 30px 20px; /* Ajustado para tablet */
         padding: 30px 24px;
         max-width: 90%;
     }
@@ -1331,7 +1339,7 @@ html {
 
 @media (max-width: 580px) {
     body {
-        padding-top: 120px !important; /* Mais espaço para header maior */
+        padding-top: 140px !important; /* Mais espaço para header responsivo */
     }
     
     #main-header {
@@ -1398,7 +1406,7 @@ html {
 
 @media (max-width: 480px) {
     body {
-        padding-top: 130px;
+        padding-top: 150px; /* Ainda mais espaço para mobile */
     }
     
     #main-header {
@@ -1477,7 +1485,7 @@ html {
     
     /* Auth container mobile */
     .auth-container, .profile-container {
-        margin: 20px 12px;
+        margin: 40px 12px 20px 12px; /* Ajustado para mobile */
         padding: 20px 16px;
         max-width: calc(100% - 24px);
         border-radius: 16px;
