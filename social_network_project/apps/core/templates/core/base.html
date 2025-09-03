@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}InstaLab{% endblock %}</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/main.css' %}">
     <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -25,34 +24,37 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body class="{% block body_class %}{% endblock %}">
-    <header>
-        <nav class="navbar">
-            <div class="nav-brand">
-                <a href="{% url 'core:home' %}">InstaLab</a>
-            </div>
-            <ul class="nav-links">
-                {% if user.is_authenticated %}
-                    <li><a href="{% url 'core:home' %}">Feed</a></li>
-                    <li><a href="{% url 'core:vagas_list' %}">Vagas</a></li>
-                    <li><a href="{% url 'messaging:stories_feed' %}">Stories</a></li>
-                    
-                    {% if user.is_student %}
-                    <li><a href="{% url 'messaging:student_social_feed' %}">Área Social</a></li>
-                    <li><a href="{% url 'core:my_applications' %}">Minhas Candidaturas</a></li>
-                    {% elif user.is_company %}
-                    <li><a href="{% url 'core:my_jobs' %}">Minhas Vagas</a></li>
-                    <li><a href="{% url 'core:create_job' %}" class="btn btn-primary btn-sm">+ Criar Vaga</a></li>
+    <!-- Header FULL WIDTH -->
+    <header id="main-header">
+        <nav class="navbar-custom">
+            <div class="nav-content">
+                <div class="nav-brand">
+                    <a href="{% url 'core:home' %}">InstaLab</a>
+                </div>
+                <ul class="nav-links">
+                    {% if user.is_authenticated %}
+                        <li><a href="{% url 'core:home' %}">Feed</a></li>
+                        <li><a href="{% url 'core:vagas_list' %}">Vagas</a></li>
+                        <li><a href="{% url 'messaging:stories_feed' %}">Stories</a></li>
+                        
+                        {% if user.is_student %}
+                        <li><a href="{% url 'messaging:student_social_feed' %}">Área Social</a></li>
+                        <li><a href="{% url 'core:my_applications' %}">Minhas Candidaturas</a></li>
+                        {% elif user.is_company %}
+                        <li><a href="{% url 'core:my_jobs' %}">Minhas Vagas</a></li>
+                        <li><a href="{% url 'core:create_job' %}" class="btn btn-primary btn-sm">+ Criar Vaga</a></li>
+                        {% endif %}
+                        
+                        <li><a href="{% url 'messaging:conversations_list' %}">Chat</a></li>
+                        <li><a href="{% url 'accounts:profile' %}">Perfil</a></li>
+                        <li><a href="{% url 'accounts:logout' %}" class="btn btn-outline">Sair</a></li>
+                    {% else %}
+                        <li><a href="{% url 'core:home' %}">Home</a></li>
+                        <li><a href="{% url 'accounts:login' %}">Login</a></li>
+                        <li><a href="{% url 'accounts:register' %}" class="btn btn-primary">Cadastro</a></li>
                     {% endif %}
-                    
-                    <li><a href="{% url 'messaging:conversations_list' %}">Chat</a></li>
-                    <li><a href="{% url 'accounts:profile' %}">Perfil</a></li>
-                    <li><a href="{% url 'accounts:logout' %}" class="btn btn-outline">Sair</a></li>
-                {% else %}
-                    <li><a href="{% url 'core:home' %}">Home</a></li>
-                    <li><a href="{% url 'accounts:login' %}">Login</a></li>
-                    <li><a href="{% url 'accounts:register' %}" class="btn btn-primary">Cadastro</a></li>
-                {% endif %}
-            </ul>
+                </ul>
+            </div>
         </nav>
     </header>
     
