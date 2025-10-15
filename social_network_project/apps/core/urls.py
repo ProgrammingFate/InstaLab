@@ -7,6 +7,12 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('search/', views.search, name='search'),
     
+    # Instagram Feed URLs
+    path('feed/', views.instagram_feed, name='instagram_feed'),
+    path('like/<int:post_id>/', views.like_post, name='like_post'),
+    path('comment/<int:post_id>/', views.add_comment, name='add_comment'),
+    path('follow/<int:user_id>/', views.follow_user, name='follow_user'),
+    
     # Vagas URLs
     path('vagas/', views.vagas_list, name='vagas_list'),
     path('vagas/criar/', views.create_job, name='create_job'),

@@ -1,5 +1,8 @@
 from django.contrib import admin
-from .models import Post, JobCategory, JobListing, JobApplication
+from .models import (
+    Post, Like, Comment, Follow, Story, StoryView,
+    JobCategory, JobListing, JobApplication
+)
 
 @admin.register(Post)
 class PostAdmin(admin.ModelAdmin):
@@ -15,9 +18,9 @@ class JobCategoryAdmin(admin.ModelAdmin):
 
 @admin.register(JobListing)
 class JobListingAdmin(admin.ModelAdmin):
-    list_display = ('title', 'company', 'category', 'status', 'priority', 'spots_available', 'created_at')
-    list_filter = ('status', 'priority', 'category', 'remote_work', 'created_at')
-    search_fields = ('title', 'company__company_name', 'company__nickname', 'description')
+    list_display = ('title', 'company', 'category', 'status', 'job_type', 'created_at')
+    list_filter = ('status', 'job_type', 'category', 'experience_level', 'created_at')
+    search_fields = ('title', 'company__username', 'description')
     ordering = ('-created_at',)
     readonly_fields = ('created_at', 'updated_at')
 
@@ -25,5 +28,32 @@ class JobListingAdmin(admin.ModelAdmin):
 class JobApplicationAdmin(admin.ModelAdmin):
     list_display = ('applicant', 'job', 'status', 'applied_at')
     list_filter = ('status', 'applied_at')
-    search_fields = ('applicant__nickname', 'job__title')
+    search_fields = ('applicant__username', 'job__title')
     ordering = ('-applied_at',)
+
+@admin.register(Like)
+class LikeAdmin(admin.ModelAdmin):
+    list_display = ('user', 'post', 'created_at')
+    list_filter = ('created_at',)
+
+@admin.register(Comment)
+class CommentAdmin(admin.ModelAdmin):
+    list_display = ('user', 'post', 'content', 'created_at')
+    list_filter = ('created_at',)
+    search_fields = ('content', 'user__username')
+
+@admin.register(Follow)
+class FollowAdmin(admin.ModelAdmin):
+    list_display = ('follower', 'following', 'created_at')
+    list_filter = ('created_at',)
+
+@admin.register(Story)
+class StoryAdmin(admin.ModelAdmin):
+    list_display = ('user', 'text_content', 'created_at', 'expires_at')
+    list_filter = ('created_at', 'expires_at')
+    ordering = ('-created_at',)
+
+@admin.register(StoryView)
+class StoryViewAdmin(admin.ModelAdmin):
+    list_display = ('story', 'user', 'viewed_at')
+    list_filter = ('viewed_at',)

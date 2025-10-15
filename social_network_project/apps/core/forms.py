@@ -1,13 +1,12 @@
 from django import forms
-from .models import JobListing, JobApplication, JobCategory
+from .models import JobListing, JobApplication, JobCategory, Post, Comment
 
 class JobListingForm(forms.ModelForm):
     class Meta:
         model = JobListing
         fields = [
-            'title', 'category', 'description', 'requirements', 'responsibilities',
-            'salary_min', 'salary_max', 'spots_available', 'location', 'remote_work',
-            'deadline', 'tags', 'priority'
+            'title', 'category', 'description', 'requirements', 'benefits',
+            'job_type', 'experience_level', 'location', 'salary_range', 'tags'
         ]
         widgets = {
             'title': forms.TextInput(attrs={
@@ -25,55 +24,37 @@ class JobListingForm(forms.ModelForm):
                 'rows': 3,
                 'placeholder': 'Quais são os requisitos necessários?'
             }),
-            'responsibilities': forms.Textarea(attrs={
+            'benefits': forms.Textarea(attrs={
                 'class': 'form-control',
                 'rows': 3,
-                'placeholder': 'Quais serão as principais responsabilidades?'
+                'placeholder': 'Quais são os benefícios oferecidos?'
             }),
-            'salary_min': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'placeholder': '800 (opcional)',
-                'step': '0.01'
-            }),
-            'salary_max': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'placeholder': '1200 (opcional)',
-                'step': '0.01'
-            }),
-            'spots_available': forms.NumberInput(attrs={
-                'class': 'form-control',
-                'min': '1',
-                'value': '1'
-            }),
+            'job_type': forms.Select(attrs={'class': 'form-control'}),
+            'experience_level': forms.Select(attrs={'class': 'form-control'}),
             'location': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Ex: São Paulo, SP ou Remoto'
             }),
-            'remote_work': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            'deadline': forms.DateTimeInput(attrs={
+            'salary_range': forms.TextInput(attrs={
                 'class': 'form-control',
-                'type': 'datetime-local'
+                'placeholder': 'Ex: R$ 2.000 - R$ 3.000'
             }),
             'tags': forms.TextInput(attrs={
                 'class': 'form-control',
                 'placeholder': 'Ex: React, TypeScript, Frontend (separadas por vírgula)'
             }),
-            'priority': forms.Select(attrs={'class': 'form-control'}),
         }
         labels = {
             'title': 'Título da Vaga',
             'category': 'Categoria',
             'description': 'Descrição',
             'requirements': 'Requisitos',
-            'responsibilities': 'Responsabilidades',
-            'salary_min': 'Salário Mínimo (R$ - Opcional)',
-            'salary_max': 'Salário Máximo (R$ - Opcional)',
-            'spots_available': 'Número de Vagas',
+            'benefits': 'Benefícios',
+            'job_type': 'Tipo de Vaga',
+            'experience_level': 'Nível de Experiência',
             'location': 'Localização',
-            'remote_work': 'Trabalho Remoto',
-            'deadline': 'Prazo Limite',
+            'salary_range': 'Faixa Salarial',
             'tags': 'Tags/Tecnologias',
-            'priority': 'Prioridade',
         }
 
 class JobApplicationForm(forms.ModelForm):
@@ -120,3 +101,52 @@ class JobFilterForm(forms.Form):
         label='Apenas vagas remotas',
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'})
     )
+
+class PostForm(forms.ModelForm):
+    """Formulário para criar posts"""
+    
+    class Meta:
+        model = Post
+        fields = ['content', 'image', 'video', 'post_type', 'location', 'hashtags']
+        widgets = {
+            'content': forms.Textarea(attrs={
+                'class': 'form-control',
+                'placeholder': 'O que você está pensando?',
+                'rows': 3,
+                'style': 'resize: none;'
+            }),
+            'image': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'image/*'
+            }),
+            'video': forms.FileInput(attrs={
+                'class': 'form-control',
+                'accept': 'video/*'
+            }),
+            'post_type': forms.Select(attrs={
+                'class': 'form-select'
+            }),
+            'location': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Adicionar localização...'
+            }),
+            'hashtags': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': '#hashtag1, #hashtag2, #hashtag3'
+            })
+        }
+
+
+class CommentForm(forms.ModelForm):
+    """Formulário para comentários"""
+    
+    class Meta:
+        model = Comment
+        fields = ['content']
+        widgets = {
+            'content': forms.TextInput(attrs={
+                'class': 'form-control',
+                'placeholder': 'Adicione um comentário...',
+                'style': 'border: none; background: transparent;'
+            })
+        }

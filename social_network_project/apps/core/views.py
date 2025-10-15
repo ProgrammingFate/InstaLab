@@ -1,11 +1,19 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from django.core.paginator import Paginator
-from django.db.models import Q
 from django.http import JsonResponse
-from .models import Post, JobListing, JobCategory, JobApplication
-from .forms import JobListingForm, JobApplicationForm
+from django.views.decorators.http import require_POST
+from django.contrib import messages
+from django.db.models import Q, Count
+from django.core.paginator import Paginator
+from django.contrib.auth import get_user_model
+from django.utils import timezone
+from .models import (
+    Post, Like, Comment, Follow, Story, StoryView,
+    JobListing, JobCategory, JobApplication
+)
+from .forms import PostForm, CommentForm, JobListingForm, JobApplicationForm
+
+User = get_user_model()
 
 def home(request):
     posts = Post.objects.all()  # Fetch all posts
@@ -210,6 +218,191 @@ def job_applications(request, job_id):
     }
     
     return render(request, 'core/job_applications.html', context)
+
+@login_required
+def instagram_feed(request):
+    """Feed principal estilo Instagram"""
+    # Posts dos usuários seguidos + próprios posts
+    following_users = request.user.following.values_list('following', flat=True)
+    
+    posts = Post.objects.filter(
+        Q(author__in=following_users) | Q(author=request.user),
+        is_active=True
+    ).select_related('author').prefetch_related('likes', 'comments')
+    
+    # Stories ativos
+    stories = Story.objects.filter(
+        user__in=following_users,
+        expires_at__gt=timezone.now()
+    ).select_related('user').annotate(
+        view_count=Count('views')
+    ).order_by('-created_at')
+    
+    # Adicionar informações de like para cada post
+    for post in posts:
+        post.user_liked = post.likes.filter(user=request.user).exists()
+    
+    # Paginação
+    paginator = Paginator(posts, 10)
+    page_number = request.GET.get('page')
+    posts_page = paginator.get_page(page_number)
+    
+    context = {
+        'posts': posts_page,
+        'stories': stories,
+        'form': PostForm(),
+    }
+    
+    return render(request, 'core/instagram_feed.html', context)
+
+
+@login_required
+@require_POST
+def like_post(request, post_id):
+    """Toggle like em um post"""
+    post = get_object_or_404(Post, id=post_id)
+    like, created = Like.objects.get_or_create(user=request.user, post=post)
+    
+    if not created:
+        like.delete()
+        liked = False
+    else:
+        liked = True
+    
+    return JsonResponse({
+        'liked': liked,
+        'likes_count': post.likes_count
+    })
+
+
+@login_required
+@require_POST
+def add_comment(request, post_id):
+    """Adicionar comentário a um post"""
+    post = get_object_or_404(Post, id=post_id)
+    content = request.POST.get('content', '').strip()
+    
+    if content:
+        comment = Comment.objects.create(
+            user=request.user,
+            post=post,
+            content=content
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'comment': {
+                'id': comment.id,
+                'user': comment.user.username,
+                'content': comment.content,
+                'created_at': comment.created_at.strftime('%d/%m/%Y %H:%M')
+            }
+        })
+    
+    return JsonResponse({'success': False})
+
+
+@login_required
+def create_post(request):
+    """Criar novo post"""
+    if request.method == 'POST':
+        form = PostForm(request.POST, request.FILES)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.author = request.user
+            post.save()
+            messages.success(request, 'Post criado com sucesso!')
+            return redirect('core:instagram_feed')
+    else:
+        form = PostForm()
+    
+    return render(request, 'core/create_post.html', {'form': form})
+
+
+@login_required
+def view_story(request, story_id):
+    """Visualizar story"""
+    story = get_object_or_404(Story, id=story_id)
+    
+    # Registrar visualização
+    StoryView.objects.get_or_create(story=story, user=request.user)
+    
+    # Buscar próximo story
+    next_story = Story.objects.filter(
+        user=story.user,
+        created_at__gt=story.created_at,
+        expires_at__gt=timezone.now()
+    ).first()
+    
+    # Se não há próximo do mesmo usuário, buscar de outro usuário
+    if not next_story:
+        following_users = request.user.following.values_list('following', flat=True)
+        next_story = Story.objects.filter(
+            user__in=following_users,
+            expires_at__gt=timezone.now()
+        ).exclude(id=story.id).first()
+    
+    context = {
+        'story': story,
+        'next_story': next_story,
+        'views_count': story.views.count()
+    }
+    
+    return render(request, 'core/story_view.html', context)
+
+
+@login_required
+def user_profile_feed(request, username):
+    """Perfil do usuário com grid de posts"""
+    user = get_object_or_404(User, username=username)
+    posts = Post.objects.filter(author=user, is_active=True)
+    
+    # Verificar se segue o usuário
+    is_following = Follow.objects.filter(
+        follower=request.user, 
+        following=user
+    ).exists() if request.user != user else False
+    
+    context = {
+        'profile_user': user,
+        'posts': posts,
+        'is_following': is_following,
+        'posts_count': posts.count(),
+        'followers_count': user.followers.count(),
+        'following_count': user.following.count(),
+    }
+    
+    return render(request, 'core/user_profile_feed.html', context)
+
+
+@login_required
+@require_POST
+def follow_user(request, user_id):
+    """Seguir/desseguir usuário"""
+    user_to_follow = get_object_or_404(User, id=user_id)
+    
+    if user_to_follow == request.user:
+        return JsonResponse({'success': False, 'message': 'Não é possível seguir a si mesmo'})
+    
+    follow, created = Follow.objects.get_or_create(
+        follower=request.user,
+        following=user_to_follow
+    )
+    
+    if not created:
+        follow.delete()
+        following = False
+        message = f'Você não segue mais {user_to_follow.username}'
+    else:
+        following = True
+        message = f'Você agora segue {user_to_follow.username}'
+    
+    return JsonResponse({
+        'success': True,
+        'following': following,
+        'message': message,
+        'followers_count': user_to_follow.followers.count()
+    })
 
 # Compatibilidade com a view antiga
 @login_required
