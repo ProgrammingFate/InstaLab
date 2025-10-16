@@ -1,179 +1,1773 @@
-{% extends 'core/base.html' %}
-{% load static %}
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feed - InstaLab</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            /* Dark Theme Colors */
+            --bg-primary: #000000;
+            --bg-secondary: #121212;
+            --bg-card: #1a1a1a;
+            --text-primary: #ffffff;
+            --text-secondary: #a3a3a3;
+            --text-muted: #737373;
+            --border-color: #2a2a2a;
+            --accent-primary: #0095f6;
+            --accent-secondary: #1877f2;
+            --heart-color: #ff3040;
+            --gradient: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+            --header-bg: rgba(0, 0, 0, 0.8);
+            --header-border: rgba(42, 42, 42, 0.8);
+        }
 
-{% block title %}Feed - InstaLab{% endblock %}
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-{% block extra_css %}
-<link href="https://fonts.googleapis.com/css2?family=Lobster+Two:wght@400;700&display=swap" rel="stylesheet">
-<style>
-    body {
-        background-color: #fafafa;
-        margin: 0;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
 
-    .instagram-header {
-        background: white;
-        border-bottom: 1px solid #dbdbdb;
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 1000;
-        padding: 8px 20px;
-    }
+        /* Header Moderno */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--header-bg);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--header-border);
+            z-index: 1000;
+            padding: 8px 0;
+        }
 
-    .header-content {
-        max-width: 935px;
-        margin: 0 auto;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
+        .header-content {
+            max-width: 470px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
 
-    .logo {
-        font-size: 29px;
-        font-weight: bold;
-        color: #262626;
-        text-decoration: none;
-        font-family: 'Lobster Two', cursive;
-    }
+        .logo {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
 
-    .search-box {
-        background: #efefef;
-        border: 1px solid #dbdbdb;
-        border-radius: 3px;
-        padding: 3px 16px;
-        width: 215px;
-        font-size: 14px;
-        outline: none;
-    }
+        .search-container {
+            position: relative;
+            flex: 1;
+            max-width: 268px;
+            margin: 0 20px;
+        }
 
-    .nav-icons {
-        display: flex;
-        gap: 22px;
-    }
+        .search-box {
+            width: 100%;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 6px 32px 6px 12px;
+            font-size: 14px;
+            color: var(--text-primary);
+            outline: none;
+            transition: all 0.2s;
+        }
 
-    .nav-icons a {
-        color: #262626;
-        font-size: 22px;
-        text-decoration: none;
-    }
+        .search-box::placeholder {
+            color: var(--text-muted);
+        }
 
-    .main-container {
-        max-width: 935px;
-        margin: 0 auto;
-        display: flex;
-        gap: 28px;
-        padding-top: 80px;
-        padding-left: 20px;
-        padding-right: 20px;
-    }
+        .search-box:focus {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 1px var(--accent-primary);
+        }
 
-    .feed-container {
-        flex: 1;
-        max-width: 614px;
-    }
+        .search-icon {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+        }
 
-    .post-card {
-        background: white;
-        border: 1px solid #dbdbdb;
-        border-radius: 3px;
-        margin-bottom: 24px;
-    }
+        .nav-icons {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
 
-    .post-header {
-        display: flex;
-        align-items: center;
-        padding: 16px;
-        gap: 12px;
-    }
+        .nav-icon {
+            color: var(--text-primary);
+            font-size: 22px;
+            text-decoration: none;
+            transition: all 0.2s;
+            padding: 8px;
+            border-radius: 50%;
+        }
 
-    .user-avatar {
-        width: 32px;
-        height: 32px;
-        border-radius: 50%;
-        background: #f0f0f0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #666;
-        font-weight: bold;
-    }
+        .nav-icon:hover {
+            background: var(--bg-card);
+            transform: scale(1.1);
+        }
 
-    .user-info {
-        flex: 1;
-    }
+        .nav-icon.active {
+            color: var(--accent-primary);
+        }
 
-    .username {
-        font-weight: 600;
-        font-size: 14px;
-        color: #262626;
-        text-decoration: none;
-    }
+        /* Container Principal */
+        .main-container {
+            max-width: 470px;
+            margin: 0 auto;
+            padding-top: 70px;
+            padding-bottom: 40px;
+            padding-left: 20px;
+            padding-right: 20px;
+            min-height: 100vh;
+        }
 
-    .post-time {
-        font-size: 12px;
-        color: #8e8e8e;
-    }
+        /* Stories */
+        .stories-container {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px 16px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+        }
 
-    .post-content {
-        padding: 16px;
-    }
+        .stories-container::-webkit-scrollbar {
+            height: 2px;
+        }
 
-    .post-description {
-        font-size: 14px;
-        color: #262626;
-        line-height: 18px;
-    }
-</style>
-{% endblock %}
+        .stories-container::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
 
-{% block content %}
-<div class="instagram-header">
-    <div class="header-content">
-        <a href="{% url 'instagram_feed' %}" class="logo">InstaLab</a>
+        .stories-container::-webkit-scrollbar-thumb {
+            background: var(--accent-primary);
+            border-radius: 2px;
+        }
+
+        .story-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            min-width: 70px;
+            transition: transform 0.2s;
+        }
+
+        .story-item:hover {
+            transform: scale(1.05);
+        }
+
+        .story-avatar {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: var(--gradient);
+            padding: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .story-avatar-inner {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: var(--bg-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 18px;
+            color: var(--text-primary);
+            border: 2px solid var(--bg-primary);
+        }
+
+        .story-username {
+            font-size: 12px;
+            font-weight: 400;
+            color: var(--text-secondary);
+            max-width: 70px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        /* Post Card */
+        .post-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            gap: 12px;
+        }
+
+        .post-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: white;
+            font-size: 14px;
+        }
+
+        .post-user-info {
+            flex: 1;
+        }
+
+        .post-username {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-primary);
+            text-decoration: none;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .post-username:hover {
+            color: var(--accent-primary);
+        }
+
+        .post-location {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .post-options {
+            color: var(--text-secondary);
+            font-size: 18px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+
+        .post-options:hover {
+            background: var(--bg-secondary);
+        }
+
+        /* Post Image */
+        .post-image {
+            width: 100%;
+            max-height: 468px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .post-image-placeholder {
+            width: 100%;
+            height: 300px;
+            background: var(--gradient);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        /* Post Actions */
+        .post-actions {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 12px;
+        }
+
+        .post-actions-left {
+            display: flex;
+            gap: 12px;
+        }
+
+        .post-action-btn {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 22px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+
+        .post-action-btn:hover {
+            background: var(--bg-secondary);
+            transform: scale(1.1);
+        }
+
+        .post-action-btn.liked {
+            color: var(--heart-color);
+        }
+
+        /* Post Info */
+        .post-info {
+            padding: 0 16px 16px;
+        }
+
+        .post-likes {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .post-caption {
+            font-size: 14px;
+            color: var(--text-primary);
+            line-height: 18px;
+            margin-bottom: 8px;
+        }
+
+        .post-caption .username {
+            font-weight: 600;
+            margin-right: 6px;
+        }
+
+        .post-comments-link {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .post-comments-link:hover {
+            color: var(--text-secondary);
+        }
+
+        .post-time {
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 400;
+        }
+
+        /* Add Comment */
+        .add-comment {
+            border-top: 1px solid var(--border-color);
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .add-comment input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 14px;
+            background: transparent;
+            color: var(--text-primary);
+            font-family: inherit;
+        }
+
+        .add-comment input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .post-btn {
+            background: none;
+            border: none;
+            color: var(--accent-primary);
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .post-btn:hover {
+            opacity: 0.7;
+        }
+
+        .post-btn:disabled {
+            opacity: 0.3;
+            cursor: default;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: var(--bg-card);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .empty-state p {
+            color: var(--text-muted);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* Estilos para posts de vaga */
+        .job-post-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 12px;
+            color: white;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .job-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Melhorar legibilidade dos posts de vaga */
+        .post-caption strong {
+            color: var(--accent-primary);
+        }
+
+        .post-caption br {
+            line-height: 1.6;
+        }
+
+        /* Hover effects nos stories das empresas */
+        .story-item:hover .story-avatar-inner {
+            transform: scale(1.05);
+            transition: transform 0.2s ease;
+        }
+
+        /* Story Modal */
+        .story-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .story-viewer {
+            position: relative;
+            width: 375px;
+            height: 667px;
+            max-width: 90vw;
+            max-height: 90vh;
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--gradient);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .story-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,0.6) 0%, transparent 100%);
+            padding: 16px;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .story-avatar-small {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 2px solid white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: white;
+            font-size: 14px;
+        }
+
+        .story-user-info {
+            flex: 1;
+        }
+
+        .story-username-header {
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .story-time {
+            color: rgba(255,255,255,0.8);
+            font-size: 12px;
+        }
+
+        .story-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .story-content {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 60px 24px 24px;
+            text-align: center;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .story-icon {
+            font-size: 64px;
+            margin-bottom: 24px;
+            opacity: 0.9;
+        }
+
+        .story-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            line-height: 1.2;
+        }
+
+        .story-description {
+            font-size: 16px;
+            line-height: 1.4;
+            margin-bottom: 24px;
+            opacity: 0.9;
+        }
+
+        .story-cta {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid white;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            text-decoration: none;
+            backdrop-filter: blur(10px);
+            transition: all 0.2s;
+        }
+
+        .story-cta:hover {
+            background: white;
+            color: #333;
+        }
+
+        .story-progress {
+            position: absolute;
+            top: 8px;
+            left: 16px;
+            right: 16px;
+            height: 3px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .story-progress-bar {
+            height: 100%;
+            background: white;
+            width: 0;
+            border-radius: 2px;
+            animation: storyProgress 5s linear forwards;
+        }
+
+        @keyframes storyProgress {
+            from { width: 0; }
+            to { width: 100%; }
+        }
+
+        /* Company Profile Modal */
+        .profile-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(8px);
+        }
+
+        .profile-container {
+            background: var(--bg-card);
+            border-radius: 16px;
+            max-width: 500px;
+            width: 90vw;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+        }
+
+        .profile-header {
+            position: relative;
+            padding: 40px 24px 24px;
+            text-align: center;
+            background: var(--gradient);
+            border-radius: 16px 16px 0 0;
+        }
+
+        .profile-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            backdrop-filter: blur(10px);
+        }
+
+        .profile-avatar-large {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            border: 4px solid white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+            font-size: 32px;
+            margin: 0 auto 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .profile-name {
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .profile-bio {
+            color: rgba(255,255,255,0.9);
+            font-size: 16px;
+            line-height: 1.4;
+        }
+
+        .profile-stats {
+            display: flex;
+            justify-content: space-around;
+            padding: 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .profile-stat {
+            text-align: center;
+        }
+
+        .profile-stat-number {
+            display: block;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .profile-stat-label {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .profile-actions {
+            padding: 24px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .profile-btn {
+            flex: 1;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .profile-btn-primary {
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+        }
+
+        .profile-btn-primary:hover {
+            background: var(--accent-secondary);
+            color: white;
+        }
+
+        .profile-btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .profile-btn-secondary:hover {
+            background: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .profile-info {
+            padding: 24px;
+        }
+
+        .profile-section {
+            margin-bottom: 24px;
+        }
+
+        .profile-section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 12px;
+        }
+
+        .profile-section-content {
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .profile-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .profile-tag {
+            background: var(--bg-secondary);
+            color: var(--accent-primary);
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-content {
+                max-width: 100%;
+            }
+
+            .search-container {
+                margin: 0 16px;
+                max-width: 200px;
+            }
+
+            .main-container {
+                padding-left: 0;
+                padding-right: 0;
+                max-width: 100%;
+            }
+
+            .post-card,
+            .stories-container {
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+                margin-left: 0;
+                margin-right: 0;
+            }
+
+            .nav-icons {
+                gap: 16px;
+            }
+
+            .nav-icon {
+                font-size: 20px;
+                padding: 6px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo {
+                font-size: 20px;
+            }
+
+            .search-container {
+                max-width: 150px;
+                margin: 0 12px;
+            }
+
+            .nav-icons {
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Moderno -->
+    <header class="header">
+        <div class="header-content">
+            <a href="{% url 'core:instagram_feed' %}" class="logo">InstaLab</a>
+            
+            <div class="search-container">
+                <input type="text" class="search-box" placeholder="Pesquisar">
+                <i class="fas fa-search search-icon"></i>
+            </div>
+            
+            <div class="nav-icons">
+                <a href="{% url 'core:instagram_feed' %}" class="nav-icon active" title="Feed">
+                    <i class="fas fa-home"></i>
+                </a>
+                <a href="{% url 'messaging:conversations_list' %}" class="nav-icon" title="Mensagens">
+                    <i class="far fa-paper-plane"></i>
+                </a>
+                <a href="#" class="nav-icon" title="Adicionar">
+                    <i class="far fa-plus-square"></i>
+                </a>
+                <a href="{% url 'accounts:profile' %}" class="nav-icon" title="Perfil">
+                    <i class="far fa-user"></i>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Container Principal -->
+    <main class="main-container">
+        <!-- Stories -->
+        <div class="stories-container">
+            <!-- Seu Story -->
+            <div class="story-item" data-story="user" data-company="user">
+                <div class="story-avatar">
+                    <div class="story-avatar-inner">{{ user.username|first|upper }}</div>
+                </div>
+                <span class="story-username">Seu story</span>
+            </div>
+            
+            <!-- Stories de outros usuários -->
+            {% for story_user in stories|slice:":8" %}
+            <div class="story-item" data-story="user-{{ story_user.user.id }}" data-company="{{ story_user.user.username }}">
+                <div class="story-avatar">
+                    <div class="story-avatar-inner">{{ story_user.user.username|first|upper }}</div>
+                </div>
+                <span class="story-username">{{ story_user.user.username }}</span>
+            </div>
+            {% endfor %}
+            
+            <!-- Stories de Empresas Juniores e Labs -->
+            <div class="story-item" data-story="techjr" data-company="techjr">
+                <div class="story-avatar">
+                    <div class="story-avatar-inner" style="background: linear-gradient(45deg, #667eea, #764ba2); color: white;">TJ</div>
+                </div>
+                <span class="story-username">techjr</span>
+            </div>
+            
+            <div class="story-item" data-story="ai_lab" data-company="ai_lab_usp">
+                <div class="story-avatar">
+                    <div class="story-avatar-inner" style="background: linear-gradient(45deg, #11998e, #38ef7d); color: white;">AI</div>
+                </div>
+                <span class="story-username">ai_lab_usp</span>
+            </div>
+            
+            <div class="story-item" data-story="ej_poli" data-company="ej_poli">
+                <div class="story-avatar">
+                    <div class="story-avatar-inner" style="background: linear-gradient(45deg, #fd79a8, #fdcb6e); color: white;">EJ</div>
+                </div>
+                <span class="story-username">ej_poli</span>
+            </div>
+            
+            <div class="story-item" data-story="robotics" data-company="robotics_club">
+                <div class="story-avatar">
+                    <div class="story-avatar-inner" style="background: linear-gradient(45deg, #6c5ce7, #fd79a8); color: white;">RC</div>
+                </div>
+                <span class="story-username">robotics_club</span>
+            </div>
+            
+            <div class="story-item" data-story="data_science" data-company="data_science">
+                <div class="story-avatar">
+                    <div class="story-avatar-inner" style="background: linear-gradient(45deg, #00b894, #00cec9); color: white;">DS</div>
+                </div>
+                <span class="story-username">data_science</span>
+            </div>
+            
+            <div class="story-item" data-story="startup" data-company="startup_tech">
+                <div class="story-avatar">
+                    <div class="story-avatar-inner" style="background: linear-gradient(45deg, #e17055, #fdcb6e); color: white;">ST</div>
+                </div>
+                <span class="story-username">startup_tech</span>
+            </div>
+            
+            <div class="story-item" data-story="cyber_sec" data-company="cyber_sec">
+                <div class="story-avatar">
+                    <div class="story-avatar-inner" style="background: linear-gradient(45deg, #0984e3, #74b9ff); color: white;">CY</div>
+                </div>
+                <span class="story-username">cyber_sec</span>
+            </div>
+            
+            <div class="story-item" data-story="ml_lab" data-company="ml_lab">
+                <div class="story-avatar">
+                    <div class="story-avatar-inner" style="background: linear-gradient(45deg, #a29bfe, #6c5ce7); color: white;">ML</div>
+                </div>
+                <span class="story-username">ml_lab</span>
+            </div>
+            
+            <!-- Stories de exemplo se não houver dados do banco -->
+            {% if not stories %}
+                <div class="story-item" data-story="inovacao" data-company="inovacao_jr">
+                    <div class="story-avatar">
+                        <div class="story-avatar-inner" style="background: linear-gradient(45deg, #fd79a8, #fdcb6e); color: white;">IN</div>
+                    </div>
+                    <span class="story-username">inovacao_jr</span>
+                </div>
+                <div class="story-item" data-story="biotech" data-company="biotech_lab">
+                    <div class="story-avatar">
+                        <div class="story-avatar-inner" style="background: linear-gradient(45deg, #00b894, #55efc4); color: white;">BT</div>
+                    </div>
+                    <span class="story-username">biotech_lab</span>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Posts -->
+        {% for post in posts %}
+        <article class="post-card">
+            <!-- Post Header -->
+            <header class="post-header">
+                <div class="post-avatar">
+                    {{ post.author.username|first|upper }}
+                </div>
+                <div class="post-user-info">
+                    <a href="#" class="post-username">{{ post.author.username }}</a>
+                    {% if post.author.company_name %}
+                    <div class="post-location">{{ post.author.company_name }}</div>
+                    {% endif %}
+                </div>
+                <i class="fas fa-ellipsis-h post-options"></i>
+            </header>
+
+            <!-- Post Image -->
+            {% if post.image %}
+            <img src="{{ post.image.url }}" alt="Post por {{ post.author.username }}" class="post-image">
+            {% else %}
+            <div class="post-image-placeholder">
+                <i class="fas fa-code" style="font-size: 24px; margin-right: 8px;"></i>
+                <span>{{ post.author.username|title }}</span>
+            </div>
+            {% endif %}
+
+            <!-- Post Actions -->
+            <div class="post-actions">
+                <div class="post-actions-left">
+                    <button class="post-action-btn like-btn {% if post.user_liked %}liked{% endif %}" 
+                            data-post-id="{{ post.id }}"
+                            data-liked="{% if post.user_liked %}true{% else %}false{% endif %}">
+                        <i class="{% if post.user_liked %}fas{% else %}far{% endif %} fa-heart"></i>
+                    </button>
+                    <button class="post-action-btn">
+                        <i class="far fa-comment"></i>
+                    </button>
+                    <button class="post-action-btn">
+                        <i class="far fa-paper-plane"></i>
+                    </button>
+                </div>
+                <button class="post-action-btn">
+                    <i class="far fa-bookmark"></i>
+                </button>
+            </div>
+
+            <!-- Post Info -->
+            <div class="post-info">
+                <!-- Post Likes -->
+                <div class="post-likes" id="likes-count-{{ post.id }}">
+                    <strong>{{ post.likes_count }} curtida{{ post.likes_count|pluralize }}</strong>
+                </div>
+
+                <!-- Post Caption -->
+                <div class="post-caption">
+                    <span class="username">{{ post.author.username }}</span>{{ post.content }}
+                </div>
+
+                <!-- Comments Link -->
+                {% if post.comments_count > 0 %}
+                <div class="post-comments-link">
+                    Ver todos os {{ post.comments_count }} comentários
+                </div>
+                {% endif %}
+
+                <!-- Post Time -->
+                <div class="post-time">
+                    {{ post.created_at|timesince }} atrás
+                </div>
+            </div>
+
+            <!-- Add Comment -->
+            <div class="add-comment">
+                <i class="far fa-smile" style="color: var(--text-muted);"></i>
+                <input type="text" placeholder="Adicione um comentário..." id="comment-{{ post.id }}">
+                <button class="post-btn" data-post-id="{{ post.id }}">Publicar</button>
+            </div>
+        </article>
+        {% endfor %}
+
+        <!-- Posts Mockados de Empresas/Vagas -->
         
-        <input type="text" class="search-box" placeholder="Pesquisar">
-        
-        <div class="nav-icons">
-            <a href="{% url 'instagram_feed' %}">🏠</a>
-            <a href="{% url 'messaging:conversations_list' %}">💬</a>
-            <a href="{% url 'accounts:profile' %}">👤</a>
+        <!-- Post 1: Empresa Jr Tech -->
+        <article class="post-card">
+            <header class="post-header">
+                <div class="post-avatar" style="background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);">
+                    TJ
+                </div>
+                <div class="post-user-info">
+                    <a href="#" class="post-username">techjr_company</a>
+                    <div class="post-location">Tech Jr - Empresa Junior</div>
+                </div>
+                <i class="fas fa-ellipsis-h post-options"></i>
+            </header>
+
+            <div class="post-image-placeholder job-post-placeholder" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); height: 350px;">
+                <i class="fas fa-briefcase" style="font-size: 36px;"></i>
+                <div class="job-badge">VAGA ABERTA</div>
+                <div style="text-align: center; font-size: 18px;">
+                    Desenvolvedor Frontend Jr
+                </div>
+                <div style="font-size: 14px; opacity: 0.9;">
+                    💰 R$ 800-1200 • 📍 Remoto/Híbrido
+                </div>
+            </div>
+
+            <div class="post-actions">
+                <div class="post-actions-left">
+                    <button class="post-action-btn like-btn" data-post-id="mock1">
+                        <i class="far fa-heart"></i>
+                    </button>
+                    <button class="post-action-btn">
+                        <i class="far fa-comment"></i>
+                    </button>
+                    <button class="post-action-btn">
+                        <i class="far fa-paper-plane"></i>
+                    </button>
+                </div>
+                <button class="post-action-btn">
+                    <i class="far fa-bookmark"></i>
+                </button>
+            </div>
+
+            <div class="post-info">
+                <div class="post-likes">
+                    <strong>47 curtidas</strong>
+                </div>
+                <div class="post-caption">
+                    <span class="username">techjr_company</span>🚀 Nova vaga aberta! Estamos procurando um desenvolvedor Frontend Jr para nossa equipe. 
+                    <br><br>💼 <strong>Requisitos:</strong>
+                    <br>• React.js e JavaScript
+                    <br>• CSS3 e HTML5
+                    <br>• Git/GitHub
+                    <br><br>💰 Bolsa: R$ 800-1200
+                    <br>📍 Remoto/Híbrido
+                    <br><br>#VagaAberta #Frontend #ReactJS #EmpreseJunior #Oportunidade
+                </div>
+                <div class="post-comments-link">
+                    Ver todos os 12 comentários
+                </div>
+                <div class="post-time">
+                    2 horas atrás
+                </div>
+            </div>
+
+            <div class="add-comment">
+                <i class="far fa-smile" style="color: var(--text-muted);"></i>
+                <input type="text" placeholder="Adicione um comentário..." id="comment-mock1">
+                <button class="post-btn">Publicar</button>
+            </div>
+        </article>
+
+        <!-- Post 2: Lab de IA -->
+        <article class="post-card">
+            <header class="post-header">
+                <div class="post-avatar" style="background: linear-gradient(45deg, #11998e 0%, #38ef7d 100%);">
+                    AI
+                </div>
+                <div class="post-user-info">
+                    <a href="#" class="post-username">ai_lab_usp</a>
+                    <div class="post-location">Laboratório de IA - USP</div>
+                </div>
+                <i class="fas fa-ellipsis-h post-options"></i>
+            </header>
+
+            <div class="post-image-placeholder job-post-placeholder" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); height: 320px;">
+                <i class="fas fa-robot" style="font-size: 32px;"></i>
+                <div class="job-badge">INICIAÇÃO CIENTÍFICA</div>
+                <div style="text-align: center; font-size: 16px;">
+                    Machine Learning & Deep Learning
+                </div>
+                <div style="font-size: 14px; opacity: 0.9;">
+                    🔬 USP • 💰 Bolsa CNPq
+                </div>
+            </div>
+
+            <div class="post-actions">
+                <div class="post-actions-left">
+                    <button class="post-action-btn like-btn" data-post-id="mock2">
+                        <i class="far fa-heart"></i>
+                    </button>
+                    <button class="post-action-btn">
+                        <i class="far fa-comment"></i>
+                    </button>
+                    <button class="post-action-btn">
+                        <i class="far fa-paper-plane"></i>
+                    </button>
+                </div>
+                <button class="post-action-btn">
+                    <i class="far fa-bookmark"></i>
+                </button>
+            </div>
+
+            <div class="post-info">
+                <div class="post-likes">
+                    <strong>89 curtidas</strong>
+                </div>
+                <div class="post-caption">
+                    <span class="username">ai_lab_usp</span>🤖 Oportunidade de Iniciação Científica em IA!
+                    <br><br>🔬 <strong>Área:</strong> Machine Learning aplicado à Visão Computacional
+                    <br><br>📋 <strong>O que você vai aprender:</strong>
+                    <br>• Python e TensorFlow
+                    <br>• Redes Neurais Profundas  
+                    <br>• Processamento de Imagens
+                    <br>• Metodologia Científica
+                    <br><br>💰 Bolsa CNPq disponível
+                    <br>📧 Envie seu CV para: ai.lab@usp.br
+                    <br><br>#IA #MachineLearning #IniciacaoCientifica #USP #CNPq
+                </div>
+                <div class="post-comments-link">
+                    Ver todos os 23 comentários
+                </div>
+                <div class="post-time">
+                    5 horas atrás
+                </div>
+            </div>
+
+            <div class="add-comment">
+                <i class="far fa-smile" style="color: var(--text-muted);"></i>
+                <input type="text" placeholder="Adicione um comentário..." id="comment-mock2">
+                <button class="post-btn">Publicar</button>
+            </div>
+        </article>
+
+        <!-- Post 3: Startup -->
+        <article class="post-card">
+            <header class="post-header">
+                <div class="post-avatar" style="background: linear-gradient(45deg, #fd79a8 0%, #fdcb6e 100%);">
+                    ST
+                </div>
+                <div class="post-user-info">
+                    <a href="#" class="post-username">startup_inovacao</a>
+                    <div class="post-location">Startup Inovação</div>
+                </div>
+                <i class="fas fa-ellipsis-h post-options"></i>
+            </header>
+
+            <div class="post-image-placeholder job-post-placeholder" style="background: linear-gradient(135deg, #fd79a8 0%, #fdcb6e 100%); height: 300px;">
+                <i class="fas fa-rocket" style="font-size: 30px;"></i>
+                <div class="job-badge">ESTÁGIO TECH</div>
+                <div style="text-align: center; font-size: 16px;">
+                    Backend & Mobile
+                </div>
+                <div style="font-size: 14px; opacity: 0.9;">
+                    🚀 Startup • 📱 React Native + Node.js
+                </div>
+            </div>
+
+            <div class="post-actions">
+                <div class="post-actions-left">
+                    <button class="post-action-btn like-btn" data-post-id="mock3">
+                        <i class="far fa-heart"></i>
+                    </button>
+                    <button class="post-action-btn">
+                        <i class="far fa-comment"></i>
+                    </button>
+                    <button class="post-action-btn">
+                        <i class="far fa-paper-plane"></i>
+                    </button>
+                </div>
+                <button class="post-action-btn">
+                    <i class="far fa-bookmark"></i>
+                </button>
+            </div>
+
+            <div class="post-info">
+                <div class="post-likes">
+                    <strong>72 curtidas</strong>
+                </div>
+                <div class="post-caption">
+                    <span class="username">startup_inovacao</span>🚀 Vem fazer parte da nossa equipe!
+                    <br><br>📱 <strong>Posições disponíveis:</strong>
+                    <br>• Desenvolvedor Backend (Node.js/Python)
+                    <br>• Desenvolvedor Mobile (React Native)
+                    <br><br>🎯 <strong>Oferecemos:</strong>
+                    <br>• Ambiente jovem e dinâmico
+                    <br>• Mentoria técnica
+                    <br>• Flexibilidade de horários
+                    <br>• Vale refeição + transporte
+                    <br><br>💡 Trabalhamos com soluções inovadoras para educação
+                    <br><br>#Startup #Backend #Mobile #ReactNative #NodeJS #Estágio
+                </div>
+                <div class="post-comments-link">
+                    Ver todos os 18 comentários
+                </div>
+                <div class="post-time">
+                    1 dia atrás
+                </div>
+            </div>
+
+            <div class="add-comment">
+                <i class="far fa-smile" style="color: var(--text-muted);"></i>
+                <input type="text" placeholder="Adicione um comentário..." id="comment-mock3">
+                <button class="post-btn">Publicar</button>
+            </div>
+        </article>
+
+        {% if not posts %}
+        <div class="empty-state">
+            <div class="empty-state-icon">
+                <i class="far fa-images"></i>
+            </div>
+            <h3>Bem-vindo ao InstaLab!</h3>
+            <p>Aqui você encontra oportunidades de emprego, estágios e projetos.<br>
+            Siga empresas juniores e laboratórios para ver mais conteúdo!</p>
+        </div>
+        {% endif %}
+    </main>
+
+    <!-- Story Modal -->
+    <div class="story-modal" id="storyModal">
+        <div class="story-viewer">
+            <div class="story-progress">
+                <div class="story-progress-bar"></div>
+            </div>
+            
+            <div class="story-header">
+                <div class="story-avatar-small" id="storyAvatarSmall"></div>
+                <div class="story-user-info">
+                    <div class="story-username-header" id="storyUsernameHeader"></div>
+                    <div class="story-time">2h</div>
+                </div>
+                <button class="story-close" onclick="closeStoryModal()">&times;</button>
+            </div>
+            
+            <div class="story-content" id="storyContent">
+                <!-- Conteúdo dinâmico será inserido aqui -->
+            </div>
         </div>
     </div>
-</div>
 
-<div class="main-container">
-    <div class="feed-container">
-        <h2>Feed do Instagram</h2>
-        
-        {% for post in posts %}
-        <div class="post-card">
-            <div class="post-header">
-                <div class="user-avatar">
-                    {{ post.user.username|first|upper }}
+    <!-- Profile Modal -->
+    <div class="profile-modal" id="profileModal">
+        <div class="profile-container">
+            <div class="profile-header" id="profileHeader">
+                <button class="profile-close" onclick="closeProfileModal()">&times;</button>
+                <div class="profile-avatar-large" id="profileAvatarLarge"></div>
+                <div class="profile-name" id="profileName"></div>
+                <div class="profile-bio" id="profileBio"></div>
+            </div>
+            
+            <div class="profile-stats">
+                <div class="profile-stat">
+                    <span class="profile-stat-number" id="profilePosts">42</span>
+                    <span class="profile-stat-label">posts</span>
+                </div>
+                <div class="profile-stat">
+                    <span class="profile-stat-number" id="profileFollowers">1.2k</span>
+                    <span class="profile-stat-label">seguidores</span>
+                </div>
+                <div class="profile-stat">
+                    <span class="profile-stat-number" id="profileFollowing">156</span>
+                    <span class="profile-stat-label">seguindo</span>
+                </div>
+            </div>
+            
+            <div class="profile-actions">
+                <button class="profile-btn profile-btn-primary">Seguir</button>
+                <button class="profile-btn profile-btn-secondary">Mensagem</button>
+            </div>
+            
+            <div class="profile-info" id="profileInfo">
+                <!-- Informações dinâmicas serão inseridas aqui -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CSRF Token
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Dados das empresas
+        const companiesData = {
+            techjr: {
+                name: 'Tech Jr',
+                fullName: 'Tech Jr - Empresa Junior',
+                bio: 'Empresa Junior de Tecnologia focada em desenvolvimento web e mobile. Transformando ideias em soluções digitais.',
+                avatar: 'TJ',
+                gradient: 'linear-gradient(45deg, #667eea, #764ba2)',
+                posts: 28,
+                followers: '856',
+                following: 124,
+                story: {
+                    icon: '💻',
+                    title: 'Desenvolvimento Web',
+                    description: 'Criamos sites e sistemas incríveis com as melhores tecnologias do mercado!'
+                },
+                info: {
+                    area: 'Desenvolvimento Web & Mobile',
+                    fundada: '2019',
+                    localizacao: 'São Paulo, SP',
+                    especialidades: ['React.js', 'Node.js', 'Mobile', 'UI/UX'],
+                    sobre: 'A Tech Jr é uma empresa junior focada em entregar soluções tecnológicas de alta qualidade. Nossa equipe é formada por estudantes apaixonados por tecnologia.'
+                }
+            },
+            ai_lab_usp: {
+                name: 'AI Lab USP',
+                fullName: 'Laboratório de IA - USP',
+                bio: 'Laboratório de Inteligência Artificial da USP. Pesquisa de ponta em Machine Learning e Deep Learning.',
+                avatar: 'AI',
+                gradient: 'linear-gradient(45deg, #11998e, #38ef7d)',
+                posts: 156,
+                followers: '2.3k',
+                following: 89,
+                story: {
+                    icon: '🤖',
+                    title: 'Pesquisa em IA',
+                    description: 'Desenvolvendo algoritmos que revolucionam o futuro da tecnologia!'
+                },
+                info: {
+                    area: 'Inteligência Artificial & Machine Learning',
+                    fundada: '2015',
+                    localizacao: 'São Paulo, SP - USP',
+                    especialidades: ['Deep Learning', 'Computer Vision', 'NLP', 'Robotics'],
+                    sobre: 'Laboratório de pesquisa em IA com foco em aplicações práticas e desenvolvimento de algoritmos inovadores para resolver problemas reais.'
+                }
+            },
+            ej_poli: {
+                name: 'EJ Poli',
+                fullName: 'Empresa Junior Poli',
+                bio: 'Empresa Junior da Escola Politécnica. Engenharia e inovação para transformar o mundo.',
+                avatar: 'EJ',
+                gradient: 'linear-gradient(45deg, #fd79a8, #fdcb6e)',
+                posts: 94,
+                followers: '1.8k',
+                following: 267,
+                story: {
+                    icon: '⚙️',
+                    title: 'Engenharia & Inovação',
+                    description: 'Soluções de engenharia que fazem a diferença no mercado!'
+                },
+                info: {
+                    area: 'Engenharia & Consultoria',
+                    fundada: '2010',
+                    localizacao: 'São Paulo, SP - Poli USP',
+                    especialidades: ['Automação', 'Sistemas', 'Consultoria', 'P&D'],
+                    sobre: 'A maior empresa junior da Escola Politécnica, conectando estudantes de engenharia com o mercado através de projetos inovadores.'
+                }
+            },
+            robotics_club: {
+                name: 'Robotics Club',
+                fullName: 'Clube de Robótica',
+                bio: 'Clube universitário focado em robótica e automação. Competições, workshops e muito aprendizado!',
+                avatar: 'RC',
+                gradient: 'linear-gradient(45deg, #6c5ce7, #fd79a8)',
+                posts: 73,
+                followers: '943',
+                following: 156,
+                story: {
+                    icon: '🤖',
+                    title: 'Robótica Avançada',
+                    description: 'Construindo robôs que competem em níveis nacionais e internacionais!'
+                },
+                info: {
+                    area: 'Robótica & Automação',
+                    fundada: '2017',
+                    localizacao: 'São Paulo, SP',
+                    especialidades: ['Arduino', 'Raspberry Pi', 'IoT', 'Competições'],
+                    sobre: 'Grupo de estudantes apaixonados por robótica, participando de competições e desenvolvendo projetos inovadores.'
+                }
+            },
+            data_science: {
+                name: 'Data Science',
+                fullName: 'Data Science Lab',
+                bio: 'Laboratório de Ciência de Dados. Analytics, Big Data e insights que movem negócios.',
+                avatar: 'DS',
+                gradient: 'linear-gradient(45deg, #00b894, #00cec9)',
+                posts: 127,
+                followers: '1.7k',
+                following: 203,
+                story: {
+                    icon: '📊',
+                    title: 'Ciência de Dados',
+                    description: 'Transformando dados em insights valiosos para empresas e pesquisas!'
+                },
+                info: {
+                    area: 'Ciência de Dados & Analytics',
+                    fundada: '2018',
+                    localizacao: 'São Paulo, SP',
+                    especialidades: ['Python', 'R', 'SQL', 'Machine Learning', 'Big Data'],
+                    sobre: 'Laboratório especializado em análise de dados, oferecendo soluções em analytics e machine learning para diversos setores.'
+                }
+            },
+            startup_tech: {
+                name: 'Startup Tech',
+                fullName: 'Startup Tecnologia',
+                bio: 'Startup inovadora criando soluções tecnológicas disruptivas. Do MVP ao scale-up!',
+                avatar: 'ST',
+                gradient: 'linear-gradient(45deg, #e17055, #fdcb6e)',
+                posts: 82,
+                followers: '1.1k',
+                following: 189,
+                story: {
+                    icon: '🚀',
+                    title: 'Inovação Tech',
+                    description: 'Criando soluções que revolucionam mercados tradicionais!'
+                },
+                info: {
+                    area: 'Startup & Inovação',
+                    fundada: '2021',
+                    localizacao: 'São Paulo, SP',
+                    especialidades: ['MVP Development', 'Scale-up', 'Product Management', 'Growth'],
+                    sobre: 'Startup focada em desenvolver produtos tecnológicos inovadores, da concepção ao lançamento no mercado.'
+                }
+            }
+        };
+
+        // Abrir Story Modal
+        function openStoryModal(storyId) {
+            const company = companiesData[storyId];
+            if (!company) return;
+
+            const modal = document.getElementById('storyModal');
+            const viewer = modal.querySelector('.story-viewer');
+            const avatarSmall = document.getElementById('storyAvatarSmall');
+            const usernameHeader = document.getElementById('storyUsernameHeader');
+            const content = document.getElementById('storyContent');
+
+            // Aplicar gradiente do fundo
+            viewer.style.background = company.gradient;
+
+            // Avatar pequeno no header
+            avatarSmall.textContent = company.avatar;
+            avatarSmall.style.background = 'rgba(255,255,255,0.2)';
+
+            // Username
+            usernameHeader.textContent = company.name;
+
+            // Conteúdo do story
+            content.innerHTML = `
+                <div class="story-icon">${company.story.icon}</div>
+                <div class="story-title">${company.story.title}</div>
+                <div class="story-description">${company.story.description}</div>
+                <a href="#" class="story-cta" onclick="openCompanyProfile('${storyId}')">Ver Perfil</a>
+            `;
+
+            modal.style.display = 'flex';
+
+            // Auto close após 5 segundos
+            setTimeout(() => {
+                closeStoryModal();
+            }, 5000);
+        }
+
+        // Fechar Story Modal
+        function closeStoryModal() {
+            document.getElementById('storyModal').style.display = 'none';
+        }
+
+        // Abrir Perfil da Empresa
+        function openCompanyProfile(companyId) {
+            const company = companiesData[companyId];
+            if (!company) return;
+
+            // Fechar story se estiver aberto
+            closeStoryModal();
+
+            const modal = document.getElementById('profileModal');
+            const header = document.getElementById('profileHeader');
+            const avatarLarge = document.getElementById('profileAvatarLarge');
+            const name = document.getElementById('profileName');
+            const bio = document.getElementById('profileBio');
+            const posts = document.getElementById('profilePosts');
+            const followers = document.getElementById('profileFollowers');
+            const following = document.getElementById('profileFollowing');
+            const info = document.getElementById('profileInfo');
+
+            // Header com gradiente
+            header.style.background = company.gradient;
+
+            // Avatar grande
+            avatarLarge.textContent = company.avatar;
+            avatarLarge.style.background = 'rgba(255,255,255,0.2)';
+
+            // Informações básicas
+            name.textContent = company.fullName;
+            bio.textContent = company.bio;
+
+            // Estatísticas
+            posts.textContent = company.posts;
+            followers.textContent = company.followers;
+            following.textContent = company.following;
+
+            // Informações detalhadas
+            info.innerHTML = `
+                <div class="profile-section">
+                    <div class="profile-section-title">Sobre</div>
+                    <div class="profile-section-content">${company.info.sobre}</div>
                 </div>
                 
-                <div class="user-info">
-                    <a href="#" class="username">{{ post.user.username }}</a>
-                    <div class="post-time">{{ post.created_at|timesince }} atrás</div>
+                <div class="profile-section">
+                    <div class="profile-section-title">Área de Atuação</div>
+                    <div class="profile-section-content">${company.info.area}</div>
                 </div>
-            </div>
+                
+                <div class="profile-section">
+                    <div class="profile-section-title">Fundada em</div>
+                    <div class="profile-section-content">${company.info.fundada}</div>
+                </div>
+                
+                <div class="profile-section">
+                    <div class="profile-section-title">Localização</div>
+                    <div class="profile-section-content">${company.info.localizacao}</div>
+                </div>
+                
+                <div class="profile-section">
+                    <div class="profile-section-title">Especialidades</div>
+                    <div class="profile-tags">
+                        ${company.info.especialidades.map(tag => `<span class="profile-tag">${tag}</span>`).join('')}
+                    </div>
+                </div>
+            `;
 
-            <div class="post-content">
-                <div class="post-description">
-                    <span class="username">{{ post.user.username }}</span> {{ post.content }}
-                </div>
-            </div>
-        </div>
-        {% empty %}
-        <div class="post-card">
-            <div class="post-content">
-                <p>Nenhum post ainda! Seja o primeiro a compartilhar algo.</p>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-</div>
-{% endblock %}
+            modal.style.display = 'flex';
+        }
+
+        // Fechar Profile Modal
+        function closeProfileModal() {
+            document.getElementById('profileModal').style.display = 'none';
+        }
+
+        // Toggle Like
+        function toggleLike(postId) {
+            const likeBtn = document.querySelector(`[data-post-id="${postId}"].like-btn`);
+            const likesCount = document.getElementById(`likes-count-${postId}`);
+            const icon = likeBtn.querySelector('i');
+            
+            fetch(`{% url 'core:like_post' 0 %}`.replace('0', postId), {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.liked) {
+                    icon.classList.remove('far');
+                    icon.classList.add('fas');
+                    likeBtn.classList.add('liked');
+                } else {
+                    icon.classList.remove('fas');
+                    icon.classList.add('far');
+                    likeBtn.classList.remove('liked');
+                }
+                likesCount.innerHTML = `<strong>${data.likes_count} curtida${data.likes_count !== 1 ? 's' : ''}</strong>`;
+            })
+            .catch(error => console.error('Erro ao curtir:', error));
+        }
+
+        // Add Comment
+        function addComment(postId) {
+            const input = document.getElementById(`comment-${postId}`);
+            const content = input.value.trim();
+            
+            if (!content) return;
+            
+            fetch(`{% url 'core:add_comment' 0 %}`.replace('0', postId), {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `content=${encodeURIComponent(content)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    input.value = '';
+                    console.log('Comentário adicionado:', data.comment);
+                    // Poderia adicionar o comentário à interface aqui
+                }
+            })
+            .catch(error => console.error('Erro ao comentar:', error));
+        }
+
+        // Mock likes for demo posts
+        function toggleMockLike(postId) {
+            const likeBtn = document.querySelector(`[data-post-id="${postId}"].like-btn`);
+            const icon = likeBtn.querySelector('i');
+            
+            if (icon.classList.contains('far')) {
+                icon.classList.remove('far');
+                icon.classList.add('fas');
+                likeBtn.classList.add('liked');
+            } else {
+                icon.classList.remove('fas');
+                icon.classList.add('far');
+                likeBtn.classList.remove('liked');
+            }
+        }
+
+        // Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Story clicks
+            document.querySelectorAll('.story-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const storyId = this.dataset.story;
+                    if (storyId && storyId !== 'user' && !storyId.startsWith('user-')) {
+                        openStoryModal(storyId);
+                    }
+                });
+            });
+
+            // Close modals on background click
+            document.getElementById('storyModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeStoryModal();
+                }
+            });
+
+            document.getElementById('profileModal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeProfileModal();
+                }
+            });
+
+            // Like buttons (real posts)
+            document.querySelectorAll('.like-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const postId = this.dataset.postId;
+                    
+                    // Check if it's a mock post
+                    if (postId && postId.startsWith('mock')) {
+                        toggleMockLike(postId);
+                    } else if (postId) {
+                        toggleLike(postId);
+                    }
+                });
+            });
+
+            // Comment buttons
+            document.querySelectorAll('.post-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const postId = this.dataset.postId;
+                    if (postId && !postId.startsWith('mock')) {
+                        addComment(postId);
+                    } else {
+                        // Mock comment for demo
+                        const input = this.previousElementSibling;
+                        if (input.value.trim()) {
+                            input.value = '';
+                            console.log('Comentário mockado adicionado!');
+                        }
+                    }
+                });
+            });
+
+            // Comment inputs (Enter key)
+            document.querySelectorAll('[id^="comment-"]').forEach(input => {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        const postId = this.id.replace('comment-', '');
+                        if (postId.startsWith('mock')) {
+                            // Mock comment
+                            if (this.value.trim()) {
+                                this.value = '';
+                                console.log('Comentário mockado adicionado!');
+                            }
+                        } else {
+                            addComment(postId);
+                        }
+                    }
+                });
+            });
+
+            // ESC key to close modals
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeStoryModal();
+                    closeProfileModal();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
