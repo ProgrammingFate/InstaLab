@@ -2,11 +2,16 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
+from django.views.decorators.cache import cache_page
 from django.contrib import messages
 from django.db.models import Q, Count
 from django.core.paginator import Paginator
 from django.contrib.auth import get_user_model
 from django.utils import timezone
+from django.core.exceptions import ValidationError
+from django.db import transaction
+import logging
+
 from .models import (
     Post, Like, Comment, Follow, Story, StoryView,
     JobListing, JobCategory, JobApplication
@@ -14,6 +19,7 @@ from .models import (
 from .forms import PostForm, CommentForm, JobListingForm, JobApplicationForm
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 def home(request):
     posts = Post.objects.all()  # Fetch all posts
@@ -31,37 +37,48 @@ def search(request):
 @login_required
 def vagas_list(request):
     """Lista todas as vagas com filtros"""
-    jobs = JobListing.objects.filter(status='active')
-    categories = JobCategory.objects.all()
+    try:
+        jobs = JobListing.objects.filter(status='active').select_related('company', 'category')
+        categories = JobCategory.objects.all()
+        
+        # Filtros
+        category_filter = request.GET.get('category')
+        search_query = request.GET.get('q')
+        
+        if category_filter:
+            jobs = jobs.filter(category__slug=category_filter)
+        
+        if search_query:
+            jobs = jobs.filter(
+                Q(title__icontains=search_query) |
+                Q(description__icontains=search_query) |
+                Q(company__company_name__icontains=search_query) |
+                Q(tags__icontains=search_query)
+            )
+        
+        # Paginação
+        paginator = Paginator(jobs, 6)  # 6 vagas por página
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        
+        context = {
+            'page_obj': page_obj,
+            'categories': categories,
+            'current_category': category_filter,
+            'search_query': search_query,
+        }
+        
+        return render(request, 'core/vagas_list.html', context)
     
-    # Filtros
-    category_filter = request.GET.get('category')
-    search_query = request.GET.get('q')
-    
-    if category_filter:
-        jobs = jobs.filter(category__slug=category_filter)
-    
-    if search_query:
-        jobs = jobs.filter(
-            Q(title__icontains=search_query) |
-            Q(description__icontains=search_query) |
-            Q(company__company_name__icontains=search_query) |
-            Q(tags__icontains=search_query)
-        )
-    
-    # Paginação
-    paginator = Paginator(jobs, 6)  # 6 vagas por página
-    page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    
-    context = {
-        'page_obj': page_obj,
-        'categories': categories,
-        'current_category': category_filter,
-        'search_query': search_query,
-    }
-    
-    return render(request, 'core/vagas_list.html', context)
+    except Exception as e:
+        logger.error(f"Error in vagas_list: {str(e)}", exc_info=True)
+        messages.error(request, 'Ocorreu um erro ao carregar as vagas. Tente novamente.')
+        return render(request, 'core/vagas_list.html', {
+            'page_obj': None,
+            'categories': [],
+            'current_category': None,
+            'search_query': None,
+        })
 
 @login_required
 def vaga_detail(request, job_id):
@@ -85,45 +102,60 @@ def vaga_detail(request, job_id):
     return render(request, 'core/vaga_detail.html', context)
 
 @login_required
+@transaction.atomic
 def apply_job(request, job_id):
     """Candidatar-se a uma vaga"""
-    job = get_object_or_404(JobListing, id=job_id, status='active')
-    
-    # Verificações
-    if not request.user.is_student():
-        messages.error(request, 'Apenas estudantes podem se candidatar às vagas.')
-        return redirect('core:vaga_detail', job_id=job_id)
-    
-    if job.is_deadline_passed():
-        messages.error(request, 'O prazo para esta vaga já expirou.')
-        return redirect('core:vaga_detail', job_id=job_id)
-    
-    # Verificar se já se candidatou
-    if JobApplication.objects.filter(job=job, applicant=request.user).exists():
-        messages.warning(request, 'Você já se candidatou para esta vaga.')
-        return redirect('core:vaga_detail', job_id=job_id)
-    
-    if request.method == 'POST':
-        form = JobApplicationForm(request.POST, request.FILES)
-        if form.is_valid():
-            application = form.save(commit=False)
-            application.job = job
-            application.applicant = request.user
-            application.save()
-            
-            messages.success(request, 'Candidatura enviada com sucesso!')
+    try:
+        job = get_object_or_404(JobListing, id=job_id, status='active')
+        
+        # Verificações
+        if not request.user.is_student():
+            messages.error(request, 'Apenas estudantes podem se candidatar às vagas.')
             return redirect('core:vaga_detail', job_id=job_id)
-    else:
-        form = JobApplicationForm()
+        
+        if job.is_deadline_passed():
+            messages.error(request, 'O prazo para esta vaga já expirou.')
+            return redirect('core:vaga_detail', job_id=job_id)
+        
+        # Verificar se já se candidatou
+        if JobApplication.objects.filter(job=job, applicant=request.user).exists():
+            messages.warning(request, 'Você já se candidatou para esta vaga.')
+            return redirect('core:vaga_detail', job_id=job_id)
+        
+        if request.method == 'POST':
+            form = JobApplicationForm(request.POST, request.FILES)
+            if form.is_valid():
+                try:
+                    application = form.save(commit=False)
+                    application.job = job
+                    application.applicant = request.user
+                    application.full_clean()  # Validate before saving
+                    application.save()
+                    
+                    logger.info(f"User {request.user.username} applied to job {job.id}")
+                    messages.success(request, 'Candidatura enviada com sucesso!')
+                    return redirect('core:vaga_detail', job_id=job_id)
+                except ValidationError as e:
+                    messages.error(request, f'Erro de validação: {e}')
+            else:
+                messages.error(request, 'Por favor, corrija os erros no formulário.')
+        else:
+            form = JobApplicationForm()
+        
+        context = {
+            'job': job,
+            'form': form,
+        }
+        
+        return render(request, 'core/apply_job.html', context)
     
-    context = {
-        'job': job,
-        'form': form,
-    }
-    
-    return render(request, 'core/apply_job.html', context)
+    except Exception as e:
+        logger.error(f"Error in apply_job for job {job_id}: {str(e)}", exc_info=True)
+        messages.error(request, 'Ocorreu um erro ao processar sua candidatura. Tente novamente.')
+        return redirect('core:vagas_list')
 
 @login_required
+@transaction.atomic
 def create_job(request):
     """Criar nova vaga (apenas empresas)"""
     if not request.user.is_company():
@@ -133,12 +165,22 @@ def create_job(request):
     if request.method == 'POST':
         form = JobListingForm(request.POST)
         if form.is_valid():
-            job = form.save(commit=False)
-            job.company = request.user
-            job.save()
-            
-            messages.success(request, 'Vaga criada com sucesso!')
-            return redirect('core:vaga_detail', job_id=job.id)
+            try:
+                job = form.save(commit=False)
+                job.company = request.user
+                job.full_clean()  # Validate before saving
+                job.save()
+                
+                logger.info(f"Company {request.user.username} created job {job.id}")
+                messages.success(request, 'Vaga criada com sucesso!')
+                return redirect('core:vaga_detail', job_id=job.id)
+            except ValidationError as e:
+                messages.error(request, f'Erro de validação: {e}')
+            except Exception as e:
+                logger.error(f"Error creating job: {str(e)}", exc_info=True)
+                messages.error(request, 'Ocorreu um erro ao criar a vaga. Tente novamente.')
+        else:
+            messages.error(request, 'Por favor, corrija os erros no formulário.')
     else:
         form = JobListingForm()
     
@@ -222,72 +264,112 @@ def job_applications(request, job_id):
 @login_required
 def instagram_feed(request):
     """Feed principal estilo Instagram"""
-    # Posts dos usuários seguidos + próprios posts
-    following_users = request.user.following.values_list('following', flat=True)
+    try:
+        # Posts dos usuários seguidos + próprios posts
+        following_users = request.user.following.values_list('following', flat=True)
+        
+        posts = Post.objects.filter(
+            Q(author__in=following_users) | Q(author=request.user),
+            is_active=True
+        ).select_related('author').prefetch_related('likes', 'comments')
+        
+        # Stories ativos
+        stories = Story.objects.filter(
+            user__in=following_users,
+            expires_at__gt=timezone.now()
+        ).select_related('user').annotate(
+            view_count=Count('views')
+        ).order_by('-created_at')
+        
+        # Adicionar informações de like para cada post
+        liked_posts = Like.objects.filter(
+            user=request.user,
+            post__in=posts
+        ).values_list('post_id', flat=True)
+        
+        for post in posts:
+            post.user_liked = post.id in liked_posts
+        
+        # Paginação
+        paginator = Paginator(posts, 10)
+        page_number = request.GET.get('page')
+        posts_page = paginator.get_page(page_number)
+        
+        context = {
+            'posts': posts_page,
+            'stories': stories,
+            'form': PostForm(),
+        }
+        
+        return render(request, 'core/instagram_feed.html', context)
     
-    posts = Post.objects.filter(
-        Q(author__in=following_users) | Q(author=request.user),
-        is_active=True
-    ).select_related('author').prefetch_related('likes', 'comments')
-    
-    # Stories ativos
-    stories = Story.objects.filter(
-        user__in=following_users,
-        expires_at__gt=timezone.now()
-    ).select_related('user').annotate(
-        view_count=Count('views')
-    ).order_by('-created_at')
-    
-    # Adicionar informações de like para cada post
-    for post in posts:
-        post.user_liked = post.likes.filter(user=request.user).exists()
-    
-    # Paginação
-    paginator = Paginator(posts, 10)
-    page_number = request.GET.get('page')
-    posts_page = paginator.get_page(page_number)
-    
-    context = {
-        'posts': posts_page,
-        'stories': stories,
-        'form': PostForm(),
-    }
-    
-    return render(request, 'core/instagram_feed.html', context)
+    except Exception as e:
+        logger.error(f"Error in instagram_feed: {str(e)}", exc_info=True)
+        messages.error(request, 'Ocorreu um erro ao carregar o feed. Tente novamente.')
+        return render(request, 'core/instagram_feed.html', {
+            'posts': [],
+            'stories': [],
+            'form': PostForm(),
+        })
 
 
 @login_required
 @require_POST
+@transaction.atomic
 def like_post(request, post_id):
     """Toggle like em um post"""
-    post = get_object_or_404(Post, id=post_id)
-    like, created = Like.objects.get_or_create(user=request.user, post=post)
+    try:
+        post = get_object_or_404(Post, id=post_id)
+        like, created = Like.objects.get_or_create(user=request.user, post=post)
+        
+        if not created:
+            like.delete()
+            liked = False
+        else:
+            liked = True
+        
+        return JsonResponse({
+            'success': True,
+            'liked': liked,
+            'likes_count': post.likes.count()
+        })
     
-    if not created:
-        like.delete()
-        liked = False
-    else:
-        liked = True
-    
-    return JsonResponse({
-        'liked': liked,
-        'likes_count': post.likes_count
-    })
+    except Exception as e:
+        logger.error(f"Error in like_post for post {post_id}: {str(e)}", exc_info=True)
+        return JsonResponse({
+            'success': False,
+            'error': 'Ocorreu um erro ao processar o like.'
+        }, status=500)
 
 
 @login_required
 @require_POST
+@transaction.atomic
 def add_comment(request, post_id):
     """Adicionar comentário a um post"""
-    post = get_object_or_404(Post, id=post_id)
-    content = request.POST.get('content', '').strip()
-    
-    if content:
+    try:
+        post = get_object_or_404(Post, id=post_id)
+        content = request.POST.get('content', '').strip()
+        
+        if not content:
+            return JsonResponse({
+                'success': False,
+                'error': 'O comentário não pode estar vazio.'
+            }, status=400)
+        
+        if len(content) > 500:
+            return JsonResponse({
+                'success': False,
+                'error': 'O comentário não pode ter mais de 500 caracteres.'
+            }, status=400)
+        
         comment = Comment.objects.create(
             user=request.user,
             post=post,
             content=content
         )
+        
+        logger.info(f"User {request.user.username} commented on post {post_id}")
         
         return JsonResponse({
             'success': True,
@@ -299,7 +381,12 @@ def add_comment(request, post_id):
             }
         })
     
-    return JsonResponse({'success': False})
+    except Exception as e:
+        logger.error(f"Error in add_comment for post {post_id}: {str(e)}", exc_info=True)
+        return JsonResponse({
+            'success': False,
+            'error': 'Ocorreu um erro ao adicionar o comentário.'
+        }, status=500)
 
 
 @login_required

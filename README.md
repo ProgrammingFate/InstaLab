@@ -4,6 +4,7 @@ Plataforma de vagas e estágios para estudantes, empresas e laboratórios de tec
 
 ## ✨ Funcionalidades Principais
 
+### 💼 Sistema de Vagas
 - **Sistema de Usuários Diferenciados**: Cadastro como Estudante ou Empresa
 - **Gestão de Vagas**: Empresas podem criar, editar e gerenciar suas vagas
 - **Aplicação a Vagas**: Estudantes podem se candidatar às oportunidades
@@ -11,32 +12,83 @@ Plataforma de vagas e estágios para estudantes, empresas e laboratórios de tec
 - **Categorização**: Vagas organizadas por categorias (Tecnologia, Design, etc.)
 - **Busca e Filtros**: Sistema de pesquisa por título, categoria e localização
 - **Dashboard Personalizado**: Visualização das candidaturas e vagas criadas
+
+### 📱 Rede Social
+- **Feed Estilo Instagram**: Posts com fotos, vídeos e textos
+- **Stories**: Conteúdo temporário (24 horas)
+- **Likes e Comentários**: Interação social completa
+- **Seguir Usuários**: Sistema de follows
 - **Interface Moderna**: Design inspirado no Instagram com glassmorphism
+
+### 🔌 API REST
+- **Autenticação JWT**: Segura e moderna
+- **Documentação Swagger**: Interativa e completa
+- **Endpoints Completos**: Posts, Vagas, Candidaturas, Usuários
+- **Pronto para Mobile**: Aplicações móveis podem consumir a API
 
 ## 🎯 Tipos de Usuário
 
 - **Estudantes**: Podem navegar, pesquisar e se candidatar a vagas
 - **Empresas**: Podem criar vagas, gerenciar candidaturas e visualizar perfis dos candidatos
 
+## 🎉 Novidades v2.0
+
+### ✅ Recém Implementado
+- ✅ **API REST Completa** com Django REST Framework
+- ✅ **Autenticação JWT** para segurança
+- ✅ **Documentação Swagger** interativa
+- ✅ **Sistema de Cache** com Redis
+- ✅ **Logging Estruturado** para monitoramento
+- ✅ **Otimização de Performance** (índices de DB)
+- ✅ **Testes Automatizados** (50+ testes)
+- ✅ **Variáveis de Ambiente** para segurança
+- ✅ **Tratamento Robusto de Erros**
+- ✅ **Validações Completas** nos models
+
+### 📚 Nova Documentação
+- 📖 `IMPROVEMENTS.md` - Detalhes técnicos das melhorias
+- 🚀 `QUICKSTART.md` - Guia rápido de instalação
+- 📊 `SUMMARY.md` - Resumo executivo
+- 🔌 `API_EXAMPLES.md` - Exemplos de uso da API
+- ⚙️ `INSTALLATION.md` - Guia de instalação detalhado
+
 ## 🗺️ Roadmap (Próximas Etapas)
 
-1. Sistema de mensagens entre empresas e candidatos
-2. Notificações em tempo real
-3. Upload de currículos (PDF)
-4. Sistema de avaliação de candidatos
-5. Relatórios e analytics para empresas
-6. API REST para aplicações móveis
-7. Sistema de recomendações
+1. ~~API REST para aplicações móveis~~ ✅ **CONCLUÍDO**
+2. Sistema de mensagens entre empresas e candidatos
+3. Notificações em tempo real via WebSocket
+4. Upload de currículos (PDF) com parser
+5. Sistema de avaliação de candidatos
+6. Relatórios e analytics para empresas
+7. Sistema de recomendações com ML
 8. Deploy em produção
+9. CI/CD com GitHub Actions
+10. App móvel (React Native)
 
 ## 🛠️ Stack Tecnológica
 
-- **Backend**: Django 4.2.9
-- **Banco de Dados**: SQLite (desenvolvimento) / PostgreSQL (produção)
-- **Upload de Arquivos**: Pillow para processamento de imagens
-- **Frontend**: HTML5, CSS3 com Glassmorphism, JavaScript
-- **Autenticação**: Sistema customizado com tipos de usuário
-- **Deploy**: Docker / docker-compose (configurado)
+### Backend
+- **Django 4.2.9** - Framework web
+- **Django REST Framework 3.14** - API REST
+- **Channels 4.0** - WebSocket support
+- **PostgreSQL / SQLite** - Banco de dados
+- **Redis** - Cache e Channels
+
+### APIs & Integrações
+- **JWT** - Autenticação segura
+- **drf-spectacular** - Documentação OpenAPI/Swagger
+- **django-filter** - Filtros avançados
+
+### Frontend
+- **HTML5, CSS3** com Glassmorphism
+- **JavaScript** vanilla
+- **Bootstrap 5** (customizado)
+
+### DevOps
+- **Docker & docker-compose** - Containerização
+- **Gunicorn** - WSGI server
+- **WhiteNoise** - Static files
+- **Logging rotativo** - Monitoramento
 
 ## 📂 Estrutura do Projeto
 
@@ -53,25 +105,52 @@ templates/ (templates HTML)
 
 ## 🚀 Como Executar
 
-### Desenvolvimento Local
+### 📖 Guias Disponíveis
+- 🚀 **QUICKSTART.md** - Guia rápido
+- ⚙️ **INSTALLATION.md** - Instalação detalhada
+- 🔌 **API_EXAMPLES.md** - Exemplos da API
+
+### Desenvolvimento Local (Rápido)
 
 ```bash
-# Clone o repositório
+# 1. Clone o repositório
 git clone https://github.com/ProgrammingFate/InstaLab.git
 cd InstaLab/social_network_project
 
-# Instale as dependências
+# 2. Crie ambiente virtual
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# ou venv\Scripts\activate  # Windows
+
+# 3. Instale dependências
 pip install -r requirements.txt
 
-# Execute as migrações
+# 4. Configure variáveis de ambiente
+cp .env.example .env
+# Edite .env com suas configurações
+
+# 5. Crie diretório de logs
+mkdir logs
+
+# 6. Execute migrações
+python manage.py makemigrations
 python manage.py migrate
 
-# Crie dados de teste (opcional)
-python create_test_users.py
-python populate_jobs.py
+# 7. (Opcional) Crie superusuário
+python manage.py createsuperuser
 
-# Execute o servidor
+# 8. (Opcional) Dados de teste
+python scripts/test_data/create_test_users.py
+
+# 9. Execute o servidor
 python manage.py runserver 8001
+```
+
+### Usando Script Helper
+
+```bash
+chmod +x manage_helper.sh
+./manage_helper.sh  # Menu interativo
 ```
 
 ### Com Docker
@@ -80,7 +159,12 @@ python manage.py runserver 8001
 docker compose up --build
 ```
 
-Acesse: http://localhost:8001
+### 🌐 Acesso
+
+- **Site**: http://localhost:8001
+- **Admin**: http://localhost:8001/admin
+- **API**: http://localhost:8001/api/v1/
+- **API Docs (Swagger)**: http://localhost:8001/api/docs/
 
 ## 👤 Usuários de Teste
 
@@ -118,8 +202,9 @@ docker compose run --rm web python manage.py createsuperuser
 docker compose run --rm web python manage.py test
 ```
 
-## � Funcionalidades Implementadas
+## ✅ Funcionalidades Implementadas
 
+### Core Features
 - ✅ Sistema de autenticação diferenciado (Estudante/Empresa)
 - ✅ CRUD completo de vagas
 - ✅ Sistema de candidaturas
@@ -129,6 +214,30 @@ docker compose run --rm web python manage.py test
 - ✅ Interface responsiva com design moderno
 - ✅ Paginação de resultados
 - ✅ Gestão de status de candidaturas
+
+### Rede Social
+- ✅ Feed estilo Instagram
+- ✅ Posts (foto, vídeo, texto)
+- ✅ Stories temporários (24h)
+- ✅ Likes e comentários
+- ✅ Sistema de follows
+- ✅ Hashtags
+
+### API & Performance
+- ✅ API REST completa
+- ✅ Autenticação JWT
+- ✅ Documentação Swagger
+- ✅ Cache com Redis
+- ✅ Índices de banco de dados
+- ✅ Query optimization
+
+### Qualidade & Segurança
+- ✅ 50+ testes automatizados
+- ✅ Logging estruturado
+- ✅ Tratamento robusto de erros
+- ✅ Validações completas
+- ✅ Variáveis de ambiente
+- ✅ Configurações de segurança
 
 ## 🎯 Casos de Uso
 
