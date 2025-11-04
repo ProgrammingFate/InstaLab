@@ -271,7 +271,7 @@ def instagram_feed(request):
         posts = Post.objects.filter(
             Q(author__in=following_users) | Q(author=request.user),
             is_active=True
-        ).select_related('author').prefetch_related('likes', 'comments')
+        ).select_related('author').prefetch_related('likes', 'comments__user')
         
         # Stories ativos
         stories = Story.objects.filter(
@@ -295,10 +295,16 @@ def instagram_feed(request):
         page_number = request.GET.get('page')
         posts_page = paginator.get_page(page_number)
         
+        # Empresas para perfis
+        companies = User.objects.filter(user_type='company').values(
+            'username', 'company_name', 'company_description', 'bio'
+        )
+        
         context = {
             'posts': posts_page,
             'stories': stories,
             'form': PostForm(),
+            'companies': list(companies),
         }
         
         return render(request, 'core/instagram_feed.html', context)
@@ -310,6 +316,7 @@ def instagram_feed(request):
             'posts': [],
             'stories': [],
             'form': PostForm(),
+            'companies': [],
         })
 
 

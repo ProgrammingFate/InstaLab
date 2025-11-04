@@ -367,6 +367,65 @@
             color: var(--text-secondary);
         }
 
+        /* Comments Section */
+        .comments-section {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-in-out;
+            margin-bottom: 8px;
+            padding: 0;
+        }
+
+        .comments-section.expanded {
+            max-height: 600px;
+            overflow-y: auto;
+            padding: 8px 0;
+        }
+
+        .comments-section::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .comments-section::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        .comments-section::-webkit-scrollbar-thumb {
+            background: var(--accent-primary);
+            border-radius: 2px;
+        }
+
+        .comment-item {
+            padding: 8px 0;
+            font-size: 14px;
+            color: var(--text-primary);
+            line-height: 18px;
+        }
+
+        .comment-username {
+            font-weight: 600;
+            margin-right: 6px;
+            color: var(--text-primary);
+        }
+
+        .comment-time {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .view-more-comments {
+            color: var(--text-muted);
+            font-size: 14px;
+            cursor: pointer;
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        .view-more-comments:hover {
+            color: var(--text-secondary);
+        }
+
         .post-time {
             font-size: 12px;
             color: var(--text-muted);
@@ -985,11 +1044,11 @@
         <article class="post-card">
             <!-- Post Header -->
             <header class="post-header">
-                <div class="post-avatar">
+                <div class="post-avatar" onclick="{% if post.author.is_company %}openCompanyProfile('{{ post.author.username }}'){% endif %}" style="cursor: {% if post.author.is_company %}pointer{% else %}default{% endif %};">
                     {{ post.author.username|first|upper }}
                 </div>
                 <div class="post-user-info">
-                    <a href="#" class="post-username">{{ post.author.username }}</a>
+                    <a href="#" class="post-username" onclick="{% if post.author.is_company %}event.preventDefault(); openCompanyProfile('{{ post.author.username }}'){% endif %}">{{ post.author.username }}</a>
                     {% if post.author.company_name %}
                     <div class="post-location">{{ post.author.company_name }}</div>
                     {% endif %}
@@ -1039,10 +1098,18 @@
                     <span class="username">{{ post.author.username }}</span>{{ post.content }}
                 </div>
 
-                <!-- Comments Link -->
-                {% if post.comments_count > 0 %}
-                <div class="post-comments-link">
-                    Ver todos os {{ post.comments_count }} comentários
+                <!-- Comments Section -->
+                {% if post.comments.all %}
+                <div class="view-more-comments" onclick="toggleComments('{{ post.id }}')">
+                    Ver todos os {{ post.comments.count }} comentários
+                </div>
+                <div class="comments-section" id="comments-{{ post.id }}">
+                    {% for comment in post.comments.all|slice:":5" %}
+                    <div class="comment-item">
+                        <span class="comment-username">{{ comment.user.username }}</span>{{ comment.content }}
+                        <div class="comment-time">{{ comment.created_at|timesince }} atrás</div>
+                    </div>
+                    {% endfor %}
                 </div>
                 {% endif %}
 
@@ -1066,11 +1133,11 @@
         <!-- Post 1: Empresa Jr Tech -->
         <article class="post-card">
             <header class="post-header">
-                <div class="post-avatar" style="background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);">
+                <div class="post-avatar" style="background: linear-gradient(45deg, #667eea 0%, #764ba2 100%); cursor: pointer;" onclick="openCompanyProfile('techjr_company')">
                     TJ
                 </div>
                 <div class="post-user-info">
-                    <a href="#" class="post-username">techjr_company</a>
+                    <a href="#" class="post-username" onclick="event.preventDefault(); openCompanyProfile('techjr_company')">techjr_company</a>
                     <div class="post-location">Tech Jr - Empresa Junior</div>
                 </div>
                 <i class="fas fa-ellipsis-h post-options"></i>
@@ -1118,9 +1185,26 @@
                     <br>📍 Remoto/Híbrido
                     <br><br>#VagaAberta #Frontend #ReactJS #EmpreseJunior #Oportunidade
                 </div>
-                <div class="post-comments-link">
+                
+                <!-- Mock Comments Section -->
+                <div class="view-more-comments" onclick="toggleComments('mock1')">
                     Ver todos os 12 comentários
                 </div>
+                <div class="comments-section" id="comments-mock1">
+                    <div class="comment-item">
+                        <span class="comment-username">joao_dev</span>Muito interessante! Vou me candidatar! 👏
+                        <div class="comment-time">1 hora atrás</div>
+                    </div>
+                    <div class="comment-item">
+                        <span class="comment-username">maria_data</span>Ótima oportunidade! Já compartilhei com amigos
+                        <div class="comment-time">45 minutos atrás</div>
+                    </div>
+                    <div class="comment-item">
+                        <span class="comment-username">pedro_mobile</span>Quando começa? Estou muito interessado!
+                        <div class="comment-time">30 minutos atrás</div>
+                    </div>
+                </div>
+                
                 <div class="post-time">
                     2 horas atrás
                 </div>
@@ -1136,11 +1220,11 @@
         <!-- Post 2: Lab de IA -->
         <article class="post-card">
             <header class="post-header">
-                <div class="post-avatar" style="background: linear-gradient(45deg, #11998e 0%, #38ef7d 100%);">
+                <div class="post-avatar" style="background: linear-gradient(45deg, #11998e 0%, #38ef7d 100%); cursor: pointer;" onclick="openCompanyProfile('ai_lab_usp')">
                     AI
                 </div>
                 <div class="post-user-info">
-                    <a href="#" class="post-username">ai_lab_usp</a>
+                    <a href="#" class="post-username" onclick="event.preventDefault(); openCompanyProfile('ai_lab_usp')">ai_lab_usp</a>
                     <div class="post-location">Laboratório de IA - USP</div>
                 </div>
                 <i class="fas fa-ellipsis-h post-options"></i>
@@ -1190,9 +1274,26 @@
                     <br>📧 Envie seu CV para: ai.lab@usp.br
                     <br><br>#IA #MachineLearning #IniciacaoCientifica #USP #CNPq
                 </div>
-                <div class="post-comments-link">
+                
+                <!-- Mock Comments Section -->
+                <div class="view-more-comments" onclick="toggleComments('mock2')">
                     Ver todos os 23 comentários
                 </div>
+                <div class="comments-section" id="comments-mock2">
+                    <div class="comment-item">
+                        <span class="comment-username">maria_data</span>Perfeito! É exatamente o que eu procurava! 🤖
+                        <div class="comment-time">3 horas atrás</div>
+                    </div>
+                    <div class="comment-item">
+                        <span class="comment-username">joao_dev</span>Que oportunidade incrível! Vou enviar meu CV
+                        <div class="comment-time">2 horas atrás</div>
+                    </div>
+                    <div class="comment-item">
+                        <span class="comment-username">pedro_mobile</span>A USP sempre com as melhores oportunidades!
+                        <div class="comment-time">1 hora atrás</div>
+                    </div>
+                </div>
+                
                 <div class="post-time">
                     5 horas atrás
                 </div>
@@ -1208,11 +1309,11 @@
         <!-- Post 3: Startup -->
         <article class="post-card">
             <header class="post-header">
-                <div class="post-avatar" style="background: linear-gradient(45deg, #fd79a8 0%, #fdcb6e 100%);">
+                <div class="post-avatar" style="background: linear-gradient(45deg, #fd79a8 0%, #fdcb6e 100%); cursor: pointer;" onclick="openCompanyProfile('startup_tech')">
                     ST
                 </div>
                 <div class="post-user-info">
-                    <a href="#" class="post-username">startup_inovacao</a>
+                    <a href="#" class="post-username" onclick="event.preventDefault(); openCompanyProfile('startup_tech')">startup_inovacao</a>
                     <div class="post-location">Startup Inovação</div>
                 </div>
                 <i class="fas fa-ellipsis-h post-options"></i>
@@ -1263,9 +1364,26 @@
                     <br><br>💡 Trabalhamos com soluções inovadoras para educação
                     <br><br>#Startup #Backend #Mobile #ReactNative #NodeJS #Estágio
                 </div>
-                <div class="post-comments-link">
+                
+                <!-- Mock Comments Section -->
+                <div class="view-more-comments" onclick="toggleComments('mock3')">
                     Ver todos os 18 comentários
                 </div>
+                <div class="comments-section" id="comments-mock3">
+                    <div class="comment-item">
+                        <span class="comment-username">pedro_mobile</span>Adorei a proposta! Trabalhar com educação é o que mais quero 🚀
+                        <div class="comment-time">20 horas atrás</div>
+                    </div>
+                    <div class="comment-item">
+                        <span class="comment-username">joao_dev</span>Backend com Node.js? Estou dentro! Já enviei meu CV
+                        <div class="comment-time">18 horas atrás</div>
+                    </div>
+                    <div class="comment-item">
+                        <span class="comment-username">maria_data</span>Ambiente startup é sempre inspirador! Boa sorte galera!
+                        <div class="comment-time">15 horas atrás</div>
+                    </div>
+                </div>
+                
                 <div class="post-time">
                     1 dia atrás
                 </div>
@@ -1365,8 +1483,42 @@
             return cookieValue;
         }
 
-        // Dados das empresas
+        // Dados das empresas do banco
+        const companiesFromDB = [
+            {% for company in companies %}
+            {
+                username: '{{ company.username }}',
+                company_name: '{{ company.company_name|escapejs }}',
+                company_description: '{{ company.company_description|escapejs }}',
+                bio: '{{ company.bio|escapejs }}'
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ];
+        
+        // Mesclar com dados mockados
         const companiesData = {
+            techjr_company: {
+                name: 'Tech Jr',
+                fullName: 'Tech Jr - Empresa Junior',
+                bio: 'Empresa Junior de Tecnologia focada em desenvolvimento web e mobile. Transformando ideias em soluções digitais.',
+                avatar: 'TJ',
+                gradient: 'linear-gradient(45deg, #667eea, #764ba2)',
+                posts: 28,
+                followers: '856',
+                following: 124,
+                story: {
+                    icon: '💻',
+                    title: 'Desenvolvimento Web',
+                    description: 'Criamos sites e sistemas incríveis com as melhores tecnologias do mercado!'
+                },
+                info: {
+                    area: 'Desenvolvimento Web & Mobile',
+                    fundada: '2019',
+                    localizacao: 'São Paulo, SP',
+                    especialidades: ['React.js', 'Node.js', 'Mobile', 'UI/UX'],
+                    sobre: 'A Tech Jr é uma empresa junior focada em entregar soluções tecnológicas de alta qualidade. Nossa equipe é formada por estudantes apaixonados por tecnologia.'
+                }
+            },
             techjr: {
                 name: 'Tech Jr',
                 fullName: 'Tech Jr - Empresa Junior',
@@ -1545,7 +1697,38 @@
 
         // Abrir Perfil da Empresa
         function openCompanyProfile(companyId) {
-            const company = companiesData[companyId];
+            // Primeiro tentar buscar do banco
+            let company = companiesData[companyId];
+            
+            // Se não encontrar, tentar buscar nos dados do banco
+            if (!company && companiesFromDB) {
+                const dbCompany = companiesFromDB.find(c => c.username === companyId);
+                if (dbCompany) {
+                    company = {
+                        name: dbCompany.username,
+                        fullName: dbCompany.company_name || dbCompany.username,
+                        bio: dbCompany.bio || dbCompany.company_description || 'Empresa júnior focada em inovação',
+                        avatar: dbCompany.username.substring(0, 2).toUpperCase(),
+                        gradient: 'linear-gradient(45deg, #667eea, #764ba2)',
+                        posts: 0,
+                        followers: '0',
+                        following: 0,
+                        story: {
+                            icon: '🚀',
+                            title: dbCompany.company_name || dbCompany.username,
+                            description: dbCompany.company_description || 'Inovação e tecnologia'
+                        },
+                        info: {
+                            area: 'Tecnologia & Inovação',
+                            fundada: '2024',
+                            localizacao: 'Brasil',
+                            especialidades: ['Inovação', 'Tecnologia', 'Desenvolvimento'],
+                            sobre: dbCompany.company_description || dbCompany.bio || 'Empresa focada em inovação e tecnologia.'
+                        }
+                    };
+                }
+            }
+            
             if (!company) return;
 
             // Fechar story se estiver aberto
@@ -1613,6 +1796,32 @@
         // Fechar Profile Modal
         function closeProfileModal() {
             document.getElementById('profileModal').style.display = 'none';
+        }
+
+        // Toggle Comments
+        function toggleComments(postId) {
+            console.log('Toggling comments for post:', postId);
+            const commentsSection = document.getElementById(`comments-${postId}`);
+            const viewMoreBtn = event.target;
+            
+            if (commentsSection) {
+                const isExpanded = commentsSection.classList.contains('expanded');
+                commentsSection.classList.toggle('expanded');
+                
+                // Atualizar texto do botão
+                if (viewMoreBtn) {
+                    const commentsCount = commentsSection.querySelectorAll('.comment-item').length;
+                    if (isExpanded) {
+                        viewMoreBtn.textContent = `Ver todos os ${commentsCount} comentários`;
+                    } else {
+                        viewMoreBtn.textContent = `Ocultar comentários`;
+                    }
+                }
+                
+                console.log('Comments section expanded:', !isExpanded);
+            } else {
+                console.error('Comments section not found for post:', postId);
+            }
         }
 
         // Toggle Like
