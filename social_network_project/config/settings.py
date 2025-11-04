@@ -12,11 +12,46 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 import os
 from pathlib import Path
-from environs import Env
 
-# Initialize environment variables
-env = Env()
-env.read_env()
+# Try to import environs, but fall back to os.environ if not available
+try:
+    from environs import Env
+    env = Env()
+    env.read_env()
+    HAS_ENVIRONS = True
+except ImportError:
+    HAS_ENVIRONS = False
+    # Fallback to using os.environ
+    class SimpleEnv:
+        @staticmethod
+        def str(key, default=''):
+            return os.environ.get(key, default)
+        
+        @staticmethod
+        def bool(key, default=False):
+            value = os.environ.get(key)
+            if value is None:
+                return default
+            return value.lower() in ('true', '1', 'yes', 'on')
+        
+        @staticmethod
+        def list(key, default=None):
+            value = os.environ.get(key)
+            if value is None:
+                return default or []
+            return [v.strip() for v in value.split(',')]
+        
+        @staticmethod
+        def int(key, default=0):
+            value = os.environ.get(key)
+            if value is None:
+                return default
+            try:
+                return int(value)
+            except ValueError:
+                return default
+    
+    env = SimpleEnv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,7 +62,7 @@ SECRET_KEY = env.str('SECRET_KEY', 'your-secret-key-change-in-production')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool('DEBUG', True)
 
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', ['localhost', '127.0.0.1'])
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', ['localhost', '127.0.0.1', '*'])
 
 # Application definition
 INSTALLED_APPS = [

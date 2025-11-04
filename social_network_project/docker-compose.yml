@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   web:
     build: .
@@ -7,10 +9,29 @@ services:
     ports:
       - "8000:8000"
     environment:
+      # Django Settings
       - DEBUG=True
+      - SECRET_KEY=django-insecure-docker-dev-key-change-in-production
+      - ALLOWED_HOSTS=localhost,127.0.0.1,*
+      
+      # Database
+      - DATABASE_ENGINE=django.db.backends.postgresql
+      - DATABASE_NAME=social_network
+      - DATABASE_USER=postgres
+      - DATABASE_PASSWORD=yourpassword
+      - DATABASE_HOST=db
+      - DATABASE_PORT=5432
+      
+      # Redis
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - CACHE_ENABLED=True
+      
+      # Django Settings Module
       - DJANGO_SETTINGS_MODULE=config.settings
     depends_on:
       - db
+      - redis
 
   db:
     image: postgres:13
@@ -20,9 +41,13 @@ services:
       - POSTGRES_DB=social_network
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=yourpassword
+    ports:
+      - "5432:5432"
 
   redis:
     image: redis:alpine
+    ports:
+      - "6379:6379"
 
 volumes:
   postgres_data:
